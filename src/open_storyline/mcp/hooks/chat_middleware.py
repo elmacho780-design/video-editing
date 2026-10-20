@@ -94,7 +94,7 @@ def _get_llm(cfg: Settings, llm_pool: dict[tuple[str, bool], ChatOpenAI], model_
 @wrap_tool_call
 async def log_tool_request(request, handler):
     sink = _MCP_LOG_SINK.get()
-    server_names = {"storyline"}
+    server_names = {"storyline", "parallel"}
 
     def emit_event(x: str | dict):
         if sink:
@@ -227,6 +227,15 @@ async def handle_tool_errors(request, handler):
 
         if isinstance(out, Command):
             return out.update.get('messages')[0]
+
+        elif isinstance(out, ToolMessage) and isinstance(out.content, list):
+            # External MCP tools return content blocks, not Storyline's artifact
+            # envelope. Preserve all blocks and metadata for the model and UI.
+            return out.model_copy(update={"additional_kwargs": {
+                **out.additional_kwargs,
+                "isError": out.status == "error",
+                "mcp_raw_text": True,
+            }})
 
         elif isinstance(out, MCPToolCallResult) and not isinstance(out.content, str):
             return ToolMessage(

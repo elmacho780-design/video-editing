@@ -51,6 +51,13 @@ available_nodes = [
 ]
 
 # =========== skills ==========
+# Web research uses Parallel Search MCP without an account or API key.
+# Set enabled=false to prevent remote research discovery and tool calls.
+[web_research]
+enabled = true
+url = "https://search.parallel.ai/mcp"
+timeout = 30.0
+
 [skills]
 skill_dir = "./.storyline/skills"
 

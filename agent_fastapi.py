@@ -1294,6 +1294,7 @@ class ChatSession:
         self.agent: Any = None
         self.node_manager = None
         self.client_context = None
+        self.web_research_session_id = str(uuid.uuid4())
         
         # 锁分离：避免“流式输出”阻塞上传/删除 pending
         self.chat_lock = asyncio.Lock()
@@ -1557,6 +1558,7 @@ class ChatSession:
         return {
             "version": 1,
             "session_id": self.session_id,
+            "web_research_session_id": self.web_research_session_id,
             "lang": self.lang,
             "history": self._persist_history(),
             "chat_model_key": self.chat_model_key,
@@ -1708,6 +1710,10 @@ class ChatSession:
             return None
 
         sess = cls(session_id=session_id, cfg=cfg)
+        try:
+            sess.web_research_session_id = str(uuid.UUID(data["web_research_session_id"]))
+        except (KeyError, ValueError, TypeError, AttributeError):
+            pass  # Older saved sessions start a new opaque research identity.
         sess.lang = str(data.get("lang") or "zh").strip().lower()
         if sess.lang not in ("zh", "en"):
             sess.lang = "zh"
@@ -1987,6 +1993,7 @@ class ChatSession:
                 ai_transition_config=(self.ai_transition_config or None),
                 pexels_api_key=None,
                 lang=self.lang,
+                web_research_session_id=self.web_research_session_id,
             )
         else:
             self.client_context.chat_model_key = self.chat_model_key
@@ -2532,6 +2539,9 @@ async def clear_session_chat(session_id: str):
     store: SessionStore = app.state.sessions
     sess = await store.get_or_404(session_id)
     async with sess.chat_lock:
+        sess.web_research_session_id = str(uuid.uuid4())
+        if sess.client_context is not None:
+            sess.client_context.web_research_session_id = sess.web_research_session_id
         sess.sent_media_total = 0
         sess._attach_stats_msg_idx = 1
         sess.lc_messages = [
