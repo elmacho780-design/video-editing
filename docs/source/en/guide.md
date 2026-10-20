@@ -1,5 +1,30 @@
 # OpenStoryline User Guide
 
+## Web research for video scripts
+
+Ask for research explicitly, for example: “Research the history of this destination for my travel video and cite the sources.” The agent can search the web and fetch source pages with [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp). Search uses Fast mode and needs no account or API key. This is enabled by default, including for older configuration files without a `[web_research]` section. Pexels remains the tool for downloading images and videos.
+
+To disable web research and its remote tool discovery, add this to `config.toml` and restart the agent service:
+
+```toml
+[web_research]
+enabled = false
+```
+
+The optional `url`, `headers` and `timeout` settings customize the Parallel MCP connection. `timeout` is in seconds for connection and response reads. For higher service limits, set an explicit authorization header with your Parallel key:
+
+```toml
+[web_research]
+enabled = true
+url = "https://search.parallel.ai/mcp"
+timeout = 30.0
+headers = { Authorization = "Bearer YOUR_PARALLEL_API_KEY" }
+```
+
+Keys are not read from environment variables. Only research tool arguments, including an opaque conversation ID, go to this service; local media and Storyline artifact headers are not attached. Research results remain references, not editing instructions. The agent still asks you to confirm the editing plan. Avoid including private information in research requests.
+
+Anonymous usage has service limits. A failed search or fetch is reported to the agent without switching providers. If discovery fails at startup, local editing remains available; restart the agent service to rediscover research tools.
+
 ---
 
 ## 0. Environment Setup

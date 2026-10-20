@@ -1,4 +1,29 @@
 # OpenStoryline 使用教程
+
+## 视频文案资料研究
+
+可以明确要求智能体查找资料，例如：“为我的旅行视频查证这个目的地的历史，并给出来源链接。”智能体可通过 [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp) 搜索网页和提取页面内容。搜索使用 Fast 模式，无需账号或 API Key，默认启用；旧配置文件没有 `[web_research]` 时也会启用。下载图片和视频仍使用 Pexels。
+
+如需禁用网页研究及其远程工具发现，在 `config.toml` 中添加以下配置，并重启智能体服务：
+
+```toml
+[web_research]
+enabled = false
+```
+
+可用 `url`、`headers` 和 `timeout` 自定义 Parallel MCP 连接，超时单位为秒，作用于连接和响应读取。需要更高服务额度时，可显式配置请求头：
+
+```toml
+[web_research]
+enabled = true
+url = "https://search.parallel.ai/mcp"
+timeout = 30.0
+headers = { Authorization = "Bearer YOUR_PARALLEL_API_KEY" }
+```
+
+此功能不会读取环境变量中的密钥，也不会附带本地媒体或 Storyline 素材请求头。请求包含资料研究参数和匿名会话标识。网页内容仅作为参考，剪辑计划仍需用户确认。请避免在研究请求中包含私人信息。
+
+匿名服务有使用额度限制。搜索或提取失败时，智能体会收到错误，不会切换到其他提供商。启动时若工具发现失败，本地剪辑仍可使用；重启智能体服务可重新发现研究工具。
 ---
 ## 0. 环境安装
 

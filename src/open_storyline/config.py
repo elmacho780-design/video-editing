@@ -131,6 +131,12 @@ class MCPConfig(ConfigBaseModel):
 class SkillsConfig(ConfigBaseModel):
     skill_dir: Path = Field(..., description="Skill directory.")
 
+class WebResearchConfig(ConfigBaseModel):
+    enabled: bool = True
+    url: str = "https://search.parallel.ai/mcp"
+    headers: dict[str, str] = Field(default_factory=dict)
+    timeout: float = Field(default=30.0, gt=0)
+
 class PexelsConfig(ConfigBaseModel):
     pexels_api_key: str = ""
 
@@ -246,6 +252,7 @@ class Settings(ConfigBaseModel):
     vlm: VLMConfig
 
     local_mcp_server: MCPConfig
+    web_research: WebResearchConfig = Field(default_factory=WebResearchConfig)
 
     skills: SkillsConfig
     search_media: PexelsConfig

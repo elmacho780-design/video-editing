@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Optional, Any
 import logging
+import uuid
 
 import httpx
 
@@ -16,6 +17,7 @@ from open_storyline.storage.agent_memory import ArtifactStore
 from open_storyline.nodes.node_manager import NodeManager
 from open_storyline.mcp.hooks.chat_middleware import handle_tool_errors, on_progress, log_tool_request
 from open_storyline.mcp.sampling_handler import make_sampling_callback
+from open_storyline.mcp.web_research import load_web_research_tools
 from open_storyline.skills.skills_io import load_skills
 
 logger = logging.getLogger(__name__)
@@ -141,6 +143,7 @@ class ClientContext:
     ai_transition_config: Optional[dict] = None # AI transition config at runtime
     llm_pool: dict[tuple[str, bool], ChatOpenAI] = field(default_factory=dict)
     lang: str = "zh" # Default language: Chinese
+    web_research_session_id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
 
 async def build_agent(
@@ -229,6 +232,7 @@ async def build_agent(
     )
 
     tools = await client.get_tools()
+    tools += await load_web_research_tools(cfg.web_research)
     skills = await load_skills(cfg.skills.skill_dir) # Load skills
     node_manager = NodeManager(tools)
 
