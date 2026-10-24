@@ -73,3 +73,7 @@ data/**
 !data/prompts/
 !data/prompts/**
 resource/**
+# Web UI images fetched by download.sh
+web/static/brand_black.png
+web/static/brand_white.png
+web/static/logo.png
