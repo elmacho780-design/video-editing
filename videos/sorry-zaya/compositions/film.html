@@ -1,0 +1,1214 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Fredoka";
+      src: url("assets/fonts/Fredoka-latin.woff2") format("woff2");
+      font-weight: 300 700;
+      font-style: normal;
+    }
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #ffffff;
+      font-family: "Fredoka", sans-serif;
+    }
+    #f-stage,
+    #f-bg1,
+    #f-bg2,
+    #f-canvas,
+    #f-iris,
+    #f-veil {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+    }
+    #f-bg1 {
+      background: radial-gradient(ellipse 1300px 900px at 50% 42%, #ffffff 0%, #fffbfa 55%, #fff0ec 100%);
+    }
+    #f-bg2 {
+      opacity: 0;
+      overflow: hidden;
+      background: radial-gradient(ellipse 1150px 820px at 50% 52%, #ffe9f1 0%, #ffcade 52%, #ffaec8 100%);
+    }
+    #f-rays {
+      position: absolute;
+      left: -440px;
+      top: -860px;
+      width: 2800px;
+      height: 2800px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 255, 255, 0.24) 0deg 7.5deg, rgba(255, 255, 255, 0) 7.5deg 15deg);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, #000 22%, transparent 60%);
+      mask-image: radial-gradient(circle at 50% 50%, #000 0%, #000 22%, transparent 60%);
+    }
+    #f-dots {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.55) 3px, rgba(255, 255, 255, 0) 4px);
+      background-size: 60px 60px;
+      background-position: 15px 15px;
+      opacity: 0.45;
+    }
+    #f-veil {
+      background: #ff6a9c;
+      opacity: 0;
+    }
+    #f-iris {
+      overflow: visible;
+    }
+    #f-title {
+      position: absolute;
+      left: 0;
+      top: 96px;
+      width: 1920px;
+      text-align: center;
+      white-space: nowrap;
+      font-weight: 700;
+      font-size: 150px;
+      line-height: 1.05;
+      letter-spacing: -1px;
+    }
+    .f-word {
+      display: inline-block;
+      color: #ffffff;
+      -webkit-text-stroke: 20px #c23668;
+      paint-order: stroke fill;
+      margin: 0 18px;
+      opacity: 0;
+      text-shadow:
+        0 4px 0 #a8285a,
+        0 8px 0 #9a2452,
+        0 12px 0 #8a1e4d,
+        0 22px 26px rgba(150, 25, 80, 0.35);
+    }
+    #f-w3 {
+      color: #ffe36e;
+    }
+    #f-tHeart {
+      display: inline-block;
+      width: 138px;
+      height: 124px;
+      margin-left: 10px;
+      vertical-align: -10px;
+      opacity: 0;
+      overflow: visible;
+      filter: drop-shadow(0 10px 0 #a62456) drop-shadow(0 18px 18px rgba(150, 25, 80, 0.3));
+    }
+  </style>
+
+  <div id="root" data-composition-id="film" data-width="1920" data-height="1080">
+    <div id="f-stage" class="clip" data-start="0" data-duration="10" data-layout-allow-overflow data-layout-allow-overlap data-layout-allow-occlusion>
+      <div id="f-bg1"></div>
+      <div id="f-bg2"><div id="f-rays"></div><div id="f-dots"></div></div>
+      <canvas id="f-canvas" width="1920" height="1080"></canvas>
+      <div id="f-veil"></div>
+      <svg id="f-iris" width="1920" height="1080" viewBox="0 0 1920 1080"><path id="f-irisPath" d="" fill="#ff6a9c" fill-rule="evenodd" /></svg>
+      <div id="f-title">
+        <span id="f-w1" class="f-word">I’m</span><span id="f-w2" class="f-word">sorry,</span><span id="f-w3" class="f-word">Zaya</span><svg id="f-tHeart" viewBox="0 0 100 90">
+          <defs>
+            <linearGradient id="f-thg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ff86b0" />
+              <stop offset="1" stop-color="#f2397a" />
+            </linearGradient>
+          </defs>
+          <path d="M50 88 C20 66 2 48 2 28 C2 13 13 2 27 2 C37 2 45 8 50 17 C55 8 63 2 73 2 C87 2 98 13 98 28 C98 48 80 66 50 88Z" fill="url(#f-thg)" stroke="#ffffff" stroke-width="8" paint-order="stroke" />
+          <ellipse cx="28" cy="24" rx="10" ry="6" transform="rotate(-30 28 24)" fill="#ffffff" opacity="0.7" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/vendor/three.min.js"></script>
+  <script>
+    (function () {
+      const DURATION = 10;
+      const W = 1920, H = 1080;
+
+      // ---------------------------------------------------------------- math
+      const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+      const prog = (t, a, b) => clamp((t - a) / (b - a));
+      const lerp = (a, b, p) => a + (b - a) * p;
+      const TAU = Math.PI * 2;
+      const E = {
+        lin: (p) => p,
+        inQ: (p) => p * p,
+        outQ: (p) => 1 - (1 - p) * (1 - p),
+        inC: (p) => p * p * p,
+        outC: (p) => 1 - Math.pow(1 - p, 3),
+        inOutC: (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2),
+        outE: (p) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p)),
+        inOutS: (p) => -(Math.cos(Math.PI * p) - 1) / 2,
+        outB: (p, s = 1.70158) => 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2),
+        elastic: (p, per = 0.38) => (p <= 0 ? 0 : p >= 1 ? 1 : Math.pow(2, -10 * p) * Math.sin(((p - per / 4) * TAU) / per) + 1),
+      };
+      // keyframe track: [[t, value(number|array), ease?], ...]; ease applies to the segment arriving at that key
+      function track(t, keys) {
+        if (t <= keys[0][0]) return keys[0][1];
+        for (let i = 1; i < keys.length; i++) {
+          if (t <= keys[i][0]) {
+            const [t0, v0] = keys[i - 1];
+            const [t1, v1, ez] = keys[i];
+            const p = (ez || E.inOutC)((t - t0) / (t1 - t0));
+            return Array.isArray(v0) ? v0.map((v, j) => lerp(v, v1[j], p)) : lerp(v0, v1, p);
+          }
+        }
+        return keys[keys.length - 1][1];
+      }
+      // a damped bump: 0 before t0, kicks to `amp`, rings out
+      function ring(t, t0, amp, decay = 7, freq = 13, rise = 0.05) {
+        if (t < t0) return 0;
+        const d = t - t0;
+        return amp * Math.min(1, d / rise) * Math.exp(-decay * d) * Math.cos(freq * d);
+      }
+      function blinkAt(t, times, w = 0.13) {
+        let b = 0;
+        for (const bt of times) {
+          const d = Math.abs(t - bt) / (w / 2);
+          if (d < 1) b = Math.max(b, 1 - d);
+        }
+        return b;
+      }
+      function mulberry32(a) {
+        return function () {
+          a |= 0; a = (a + 0x6d2b79f5) | 0;
+          let r = Math.imul(a ^ (a >>> 15), 1 | a);
+          r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+          return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      // ---------------------------------------------------------------- renderer
+      const canvas = document.getElementById("f-canvas");
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(W, H, false);
+      renderer.setClearColor(0x000000, 0);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // soft studio environment for reflections (a small light box, baked once)
+      function makeEnv() {
+        const pm = new THREE.PMREMGenerator(renderer);
+        const s = new THREE.Scene();
+        const room = new THREE.Mesh(new THREE.BoxGeometry(20, 20, 20), new THREE.MeshBasicMaterial({ color: 0xc9b8b4, side: THREE.BackSide }));
+        s.add(room);
+        const panel = (w, h, c, x, y, z, ry, rx) => {
+          const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide }));
+          m.position.set(x, y, z); m.rotation.y = ry || 0; m.rotation.x = rx || 0;
+          s.add(m);
+        };
+        const k = new THREE.Color(0xffffff).multiplyScalar(6);
+        panel(8, 5, k, -6, 5, 6, Math.PI / 4, 0);
+        panel(5, 8, new THREE.Color(0xfff0f4).multiplyScalar(3.5), 8, 3, -2, -Math.PI / 2, 0);
+        panel(14, 4, new THREE.Color(0xffffff).multiplyScalar(4), 0, 9.5, 0, 0, Math.PI / 2);
+        panel(3, 6, new THREE.Color(0xffd6e6).multiplyScalar(3), -3, 2, -8, 0, 0);
+        const tex = pm.fromScene(s, 0.03).texture;
+        pm.dispose();
+        return tex;
+      }
+      const envTex = makeEnv();
+
+      // ---------------------------------------------------------------- geometry helpers
+      function roundedBox(w, h, d, r, seg = 5) {
+        const iw = w - 2 * r, ih = h - 2 * r, cr = Math.min(iw, ih) * 0.22;
+        const s = new THREE.Shape();
+        const x0 = -iw / 2, y0 = -ih / 2;
+        s.moveTo(x0 + cr, y0);
+        s.lineTo(x0 + iw - cr, y0);
+        s.quadraticCurveTo(x0 + iw, y0, x0 + iw, y0 + cr);
+        s.lineTo(x0 + iw, y0 + ih - cr);
+        s.quadraticCurveTo(x0 + iw, y0 + ih, x0 + iw - cr, y0 + ih);
+        s.lineTo(x0 + cr, y0 + ih);
+        s.quadraticCurveTo(x0, y0 + ih, x0, y0 + ih - cr);
+        s.lineTo(x0, y0 + cr);
+        s.quadraticCurveTo(x0, y0, x0 + cr, y0);
+        const g = new THREE.ExtrudeGeometry(s, { depth: Math.max(0.001, d - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: seg, curveSegments: 14 });
+        g.center();
+        g.computeVertexNormals();
+        return g;
+      }
+      function heartShape() {
+        const s = new THREE.Shape();
+        s.moveTo(0, -0.95);
+        s.bezierCurveTo(-0.15, -0.8, -1.0, -0.3, -1.0, 0.3);
+        s.bezierCurveTo(-1.0, 0.75, -0.65, 0.98, -0.45, 0.98);
+        s.bezierCurveTo(-0.2, 0.98, -0.05, 0.82, 0, 0.62);
+        s.bezierCurveTo(0.05, 0.82, 0.2, 0.98, 0.45, 0.98);
+        s.bezierCurveTo(0.65, 0.98, 1.0, 0.75, 1.0, 0.3);
+        s.bezierCurveTo(1.0, -0.3, 0.15, -0.8, 0, -0.95);
+        return s;
+      }
+      function puffyHeart() {
+        const g = new THREE.ExtrudeGeometry(heartShape(), { depth: 0.32, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.2, bevelSegments: 10, curveSegments: 28 });
+        g.center();
+        g.computeVertexNormals();
+        return g;
+      }
+      function starShape(ro = 1, ri = 0.5) {
+        const s = new THREE.Shape();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 ? ri : ro, a = Math.PI / 2 + (i * Math.PI) / 5;
+          const x = Math.cos(a) * r, y = Math.sin(a) * r;
+          i ? s.lineTo(x, y) : s.moveTo(x, y);
+        }
+        s.closePath();
+        return s;
+      }
+      function puffyStar() {
+        const g = new THREE.ExtrudeGeometry(starShape(1, 0.52), { depth: 0.2, bevelEnabled: true, bevelThickness: 0.24, bevelSize: 0.16, bevelSegments: 8, curveSegments: 4 });
+        g.center();
+        g.computeVertexNormals();
+        return g;
+      }
+      function sparkleShape() {
+        const s = new THREE.Shape();
+        s.moveTo(0, 1);
+        s.quadraticCurveTo(0.12, 0.12, 1, 0);
+        s.quadraticCurveTo(0.12, -0.12, 0, -1);
+        s.quadraticCurveTo(-0.12, -0.12, -1, 0);
+        s.quadraticCurveTo(-0.12, 0.12, 0, 1);
+        return s;
+      }
+      const G = {
+        heart: puffyHeart(),
+        star: puffyStar(),
+        sparkle: new THREE.ShapeGeometry(sparkleShape(), 6),
+        flatHeart: (() => { const g = new THREE.ShapeGeometry(heartShape(), 10); g.center(); return g; })(),
+        sphere: new THREE.SphereGeometry(1, 40, 28),
+      };
+
+      // ---------------------------------------------------------------- materials
+      const glossy = (color, o = {}) =>
+        new THREE.MeshPhysicalMaterial(Object.assign({ color, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.12, envMap: envTex, envMapIntensity: 0.9 }, o));
+      const M = {
+        clawd: new THREE.MeshPhysicalMaterial({ color: "#d46c4a", roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.35, sheen: 0.5, sheenColor: new THREE.Color("#ffd2c2"), sheenRoughness: 0.6, envMap: envTex, envMapIntensity: 0.65 }),
+        ink: glossy("#1b0f0c", { roughness: 0.18, envMapIntensity: 1.3 }),
+        white: new THREE.MeshBasicMaterial({ color: "#ffffff" }),
+        blush: new THREE.MeshBasicMaterial({ color: "#ff8fab", transparent: true, opacity: 0, depthWrite: false }),
+        tear: glossy("#9fdcff", { roughness: 0.05, transmission: 0, transparent: true, opacity: 0.92 }),
+        heart: glossy("#ff3f7f", { roughness: 0.22 }),
+        rod: glossy("#ff6fa0", { roughness: 0.25 }),
+        knob: glossy("#ffd45a", { roughness: 0.2, metalness: 0.15 }),
+        bow: glossy("#ff3d7f", { roughness: 0.35, clearcoat: 0.6, sheen: 1, sheenColor: new THREE.Color("#ffd0e2") }),
+        puff: new THREE.MeshStandardMaterial({ color: "#fff1ee", roughness: 1, transparent: true, opacity: 0.9 }),
+        sparkleW: new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, side: THREE.DoubleSide, toneMapped: false }),
+        sparkleY: new THREE.MeshBasicMaterial({ color: "#ffe680", transparent: true, side: THREE.DoubleSide, toneMapped: false }),
+      };
+
+      // ---------------------------------------------------------------- Clawd
+      function makeClawd() {
+        const c = {};
+        c.root = new THREE.Group();
+        c.hop = new THREE.Group(); c.root.add(c.hop);
+        c.squash = new THREE.Group(); c.hop.add(c.squash);
+        c.lean = new THREE.Group(); c.squash.add(c.lean);
+        const legGeo = roundedBox(0.15, 0.34, 0.44, 0.06);
+        c.legs = [-0.5625, -0.3125, 0.3125, 0.5625].map((x) => {
+          const m = new THREE.Mesh(legGeo, M.clawd);
+          m.position.set(x, 0.17, 0);
+          m.castShadow = true;
+          c.lean.add(m);
+          return m;
+        });
+        c.body = new THREE.Group(); c.lean.add(c.body);
+        const bodyMesh = new THREE.Mesh(roundedBox(1.5, 1.0, 0.95, 0.17, 12), M.clawd);
+        bodyMesh.position.y = 0.77;
+        bodyMesh.castShadow = true;
+        bodyMesh.receiveShadow = true;
+        c.body.add(bodyMesh);
+        // arms: pivot at the shoulder, scale group for rubber-hose stretch
+        const armGeo = roundedBox(0.32, 0.25, 0.4, 0.09);
+        const arm = (side) => {
+          const pivot = new THREE.Group();
+          pivot.position.set(0.7 * side, 0.645, 0);
+          const sc = new THREE.Group(); pivot.add(sc);
+          const m = new THREE.Mesh(armGeo, M.clawd);
+          m.position.x = 0.16 * side;
+          m.castShadow = true;
+          sc.add(m);
+          c.body.add(pivot);
+          const hand = new THREE.Mesh(G.sphere, M.clawd);
+          hand.scale.set(0.13, 0.13, 0.17);
+          hand.castShadow = true;
+          hand.visible = false;
+          pivot.add(hand);
+          return { pivot, sc, hand, side };
+        };
+        c.armL = arm(-1);
+        c.armR = arm(1);
+        // face
+        c.face = new THREE.Group(); c.face.position.z = 0.476; c.body.add(c.face);
+        c.eyes = new THREE.Group(); c.face.add(c.eyes);
+        const eyeGeo = roundedBox(0.135, 0.27, 0.05, 0.045);
+        c.eyesN = new THREE.Group(); c.eyes.add(c.eyesN);
+        c.eyeL = new THREE.Mesh(eyeGeo, M.ink); c.eyeL.position.set(-0.44, 0.9, 0); c.eyesN.add(c.eyeL);
+        c.eyeR = new THREE.Mesh(eyeGeo, M.ink); c.eyeR.position.set(0.44, 0.9, 0); c.eyesN.add(c.eyeR);
+        // a tiny catch-light keeps the toy alive
+        [c.eyeL, c.eyeR].forEach((e) => {
+          const h = new THREE.Mesh(G.sphere, M.white); h.scale.setScalar(0.022); h.position.set(-0.025, 0.07, 0.03); e.add(h);
+        });
+        c.eyesP = new THREE.Group(); c.eyes.add(c.eyesP);
+        const pGeo = roundedBox(0.21, 0.31, 0.05, 0.08);
+        c.pEyes = [-0.44, 0.44].map((x) => {
+          const g = new THREE.Group(); g.position.set(x, 0.9, 0);
+          g.add(new THREE.Mesh(pGeo, M.ink));
+          const h1 = new THREE.Mesh(G.sphere, M.white); h1.scale.setScalar(0.042); h1.position.set(-0.035, 0.065, 0.035); g.add(h1);
+          const h2 = new THREE.Mesh(G.sphere, M.white); h2.scale.setScalar(0.02); h2.position.set(0.045, -0.07, 0.035); g.add(h2);
+          c.eyesP.add(g);
+          return g;
+        });
+        c.eyesH = new THREE.Group(); c.eyes.add(c.eyesH);
+        const happyGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(-0.1, -0.045, 0), new THREE.Vector3(-0.05, 0.03, 0), new THREE.Vector3(0, 0.06, 0), new THREE.Vector3(0.05, 0.03, 0), new THREE.Vector3(0.1, -0.045, 0)]), 24, 0.03, 10, false);
+        [-0.44, 0.44].forEach((x) => { const m = new THREE.Mesh(happyGeo, M.ink); m.position.set(x, 0.9, 0.01); c.eyesH.add(m); });
+        const blushGeo = new THREE.CircleGeometry(0.09, 32);
+        c.blush = [-0.6, 0.6].map((x) => { const m = new THREE.Mesh(blushGeo, M.blush); m.scale.set(1.55, 1, 1); m.position.set(x, 0.7, 0.012); c.face.add(m); return m; });
+        const mouthCurve = (pts) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(p[0], p[1], 0))), 16, 0.02, 8, false);
+        c.mouthSad = new THREE.Mesh(mouthCurve([[-0.065, -0.018], [0, 0.022], [0.065, -0.018]]), M.ink); c.mouthSad.position.set(0, 0.68, 0.01); c.face.add(c.mouthSad);
+        c.tear = new THREE.Mesh(G.sphere, M.tear); c.tear.scale.set(0.045, 0.06, 0.035); c.face.add(c.tear);
+        return c;
+      }
+      // pose: everything Clawd does in one frame
+      function poseClawd(c, p) {
+        c.root.position.set(p.x || 0, 0, p.z || 0);
+        c.root.rotation.y = p.rotY || 0;
+        c.hop.position.y = p.hopY || 0;
+        const sy = p.sqY || 1, sxz = 1 / Math.sqrt(sy);
+        c.squash.scale.set(sxz, sy, sxz);
+        c.lean.rotation.z = p.leanZ || 0;
+        c.lean.rotation.x = p.leanX || 0;
+        const lifts = p.legs || [0, 0, 0, 0];
+        c.legs.forEach((m, i) => (m.position.y = 0.17 + lifts[i]));
+        c.body.position.y = p.bob || 0;
+        c.armL.pivot.rotation.set(0, p.armLy || 0, p.armL || 0);
+        c.armR.pivot.rotation.set(0, p.armRy || 0, p.armR || 0);
+        c.armL.sc.scale.x = p.armLs || 1;
+        c.armR.sc.scale.x = p.armRs || 1;
+        [c.armL, c.armR].forEach((a) => {
+          const s = a.sc.scale.x;
+          a.hand.visible = s > 1.4;
+          a.hand.position.x = a.side * 0.31 * s;
+        });
+        const st = p.eyes || "n";
+        c.eyesN.visible = st === "n";
+        c.eyesP.visible = st === "p";
+        c.eyesH.visible = st === "h";
+        const bl = 1 - 0.9 * (p.blink || 0);
+        c.eyeL.scale.y = c.eyeR.scale.y = bl;
+        c.pEyes.forEach((g) => (g.scale.y = bl));
+        c.eyes.position.set(p.lookX || 0, p.lookY || 0, 0);
+        M.blush.opacity = 0.85 * (p.blush || 0);
+        c.mouthSad.visible = !!p.sad;
+        const tp = p.tear || 0;
+        c.tear.visible = tp > 0 && tp < 1;
+        c.tear.position.set(0.5, 0.8 - 0.22 * E.inQ(tp), 0.02);
+      }
+
+      // ---------------------------------------------------------------- the poster canvas
+      const PW = 5.4, PH = 3.0, CW = 2300, CH = 1278;
+      const pc = document.createElement("canvas"); pc.width = CW; pc.height = CH;
+      const px = pc.getContext("2d");
+      const paperBase = document.createElement("canvas"); paperBase.width = CW; paperBase.height = CH;
+      const posterTex = new THREE.CanvasTexture(pc);
+      posterTex.colorSpace = THREE.SRGBColorSpace;
+      posterTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      posterTex.repeat.set(1, 0);
+
+      function heartPath2d(ctx, cx, cy, s) {
+        // the same heart as the title, centred, s = width in px
+        const k = s / 100, X = (x) => cx + (x - 50) * k, Y = (y) => cy + (y - 45) * k;
+        ctx.beginPath();
+        ctx.moveTo(X(50), Y(88));
+        ctx.bezierCurveTo(X(20), Y(66), X(2), Y(48), X(2), Y(28));
+        ctx.bezierCurveTo(X(2), Y(13), X(13), Y(2), X(27), Y(2));
+        ctx.bezierCurveTo(X(37), Y(2), X(45), Y(8), X(50), Y(17));
+        ctx.bezierCurveTo(X(55), Y(8), X(63), Y(2), X(73), Y(2));
+        ctx.bezierCurveTo(X(87), Y(2), X(98), Y(13), X(98), Y(28));
+        ctx.bezierCurveTo(X(98), Y(48), X(80), Y(66), X(50), Y(88));
+        ctx.closePath();
+      }
+      function starPath2d(ctx, cx, cy, ro, ri, rot = 0) {
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 ? ri : ro, a = -Math.PI / 2 + rot + (i * Math.PI) / 5;
+          const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.closePath();
+      }
+      function sparklePath2d(ctx, cx, cy, r) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - r);
+        ctx.quadraticCurveTo(cx + r * 0.14, cy - r * 0.14, cx + r, cy);
+        ctx.quadraticCurveTo(cx + r * 0.14, cy + r * 0.14, cx, cy + r);
+        ctx.quadraticCurveTo(cx - r * 0.14, cy + r * 0.14, cx - r, cy);
+        ctx.quadraticCurveTo(cx - r * 0.14, cy - r * 0.14, cx, cy - r);
+        ctx.closePath();
+      }
+
+      function buildPaper() {
+        const g = paperBase.getContext("2d");
+        const rnd = mulberry32(77);
+        // paper
+        const rg = g.createRadialGradient(CW / 2, CH * 0.45, 100, CW / 2, CH / 2, CW * 0.62);
+        rg.addColorStop(0, "#fffafc");
+        rg.addColorStop(0.6, "#fff0f5");
+        rg.addColorStop(1, "#ffe0ea");
+        g.fillStyle = rg;
+        g.fillRect(0, 0, CW, CH);
+        // fibre noise
+        for (let i = 0; i < 9000; i++) {
+          const x = rnd() * CW, y = rnd() * CH, l = 4 + rnd() * 18, a = rnd() * Math.PI;
+          g.strokeStyle = rnd() < 0.5 ? "rgba(255,255,255,0.35)" : "rgba(220,140,165,0.07)";
+          g.lineWidth = 1 + rnd();
+          g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+        }
+        // scalloped lace border
+        const B = 46, sc = 34;
+        g.fillStyle = "#ff6fa0";
+        g.fillRect(0, 0, CW, B); g.fillRect(0, CH - B, CW, B); g.fillRect(0, 0, B, CH); g.fillRect(CW - B, 0, B, CH);
+        const scal = (x, y) => { g.beginPath(); g.arc(x, y, sc / 2 + 4, 0, TAU); g.fill(); };
+        for (let x = B + sc / 2; x < CW - B; x += sc) { scal(x, B); scal(x, CH - B); }
+        for (let y = B + sc / 2; y < CH - B; y += sc) { scal(B, y); scal(CW - B, y); }
+        g.fillStyle = "#ffffff";
+        const dot = (x, y) => { g.beginPath(); g.arc(x, y, 6.5, 0, TAU); g.fill(); };
+        for (let x = 40; x < CW - 20; x += 34) { dot(x, 23); dot(x, CH - 23); }
+        for (let y = 57; y < CH - 40; y += 34) { dot(23, y); dot(CW - 23, y); }
+        // dashed inner line
+        g.save();
+        g.strokeStyle = "rgba(255,111,160,0.55)";
+        g.lineWidth = 7;
+        g.setLineDash([26, 18]);
+        g.lineCap = "round";
+        const ins = 112, rr = 40;
+        g.beginPath();
+        g.roundRect(ins, ins, CW - 2 * ins, CH - 2 * ins, rr);
+        g.stroke();
+        g.restore();
+        // washi tape
+        const tape = (cx, cy, rot, col) => {
+          g.save(); g.translate(cx, cy); g.rotate(rot);
+          g.globalAlpha = 0.9;
+          g.fillStyle = col;
+          g.beginPath();
+          const w = 330, h = 86;
+          g.moveTo(-w / 2, -h / 2);
+          for (let i = 0; i <= 8; i++) g.lineTo(-w / 2 + (i % 2 ? 7 : 0), -h / 2 + (h * i) / 8);
+          g.lineTo(w / 2, h / 2);
+          for (let i = 8; i >= 0; i--) g.lineTo(w / 2 - (i % 2 ? 7 : 0), -h / 2 + (h * i) / 8);
+          g.closePath(); g.fill();
+          g.clip();
+          g.globalAlpha = 0.55; g.fillStyle = "#ffffff";
+          for (let x = -w; x < w; x += 44) { g.beginPath(); g.moveTo(x, -h); g.lineTo(x + 18, -h); g.lineTo(x + 18 + h * 2, h); g.lineTo(x + h * 2, h); g.closePath(); g.fill(); }
+          g.restore();
+        };
+        tape(150, 120, -0.62, "#ffd95a");
+        tape(CW - 150, 120, 0.62, "#9ee6cf");
+        // doodles (hand-drawn wobble)
+        const wob = (n) => (rnd() - 0.5) * n;
+        const doodleHeart = (x, y, s, fill, line) => {
+          g.save();
+          heartPath2d(g, x, y, s);
+          g.fillStyle = fill; g.fill();
+          g.lineWidth = 6; g.strokeStyle = line; g.lineJoin = "round";
+          g.translate(wob(4), wob(4));
+          heartPath2d(g, x, y, s); g.stroke();
+          g.restore();
+        };
+        const doodleStar = (x, y, r, fill, line, rot) => {
+          starPath2d(g, x, y, r, r * 0.5, rot); g.fillStyle = fill; g.fill();
+          g.lineWidth = 6; g.strokeStyle = line; g.lineJoin = "round"; starPath2d(g, x + wob(4), y + wob(4), r, r * 0.5, rot); g.stroke();
+        };
+        const sp = (x, y, r, col) => { sparklePath2d(g, x, y, r); g.fillStyle = col; g.fill(); };
+        doodleHeart(260, 330, 92, "#ffb3cc", "#ff5c93");
+        doodleHeart(2010, 1010, 104, "#ffb3cc", "#ff5c93");
+        doodleHeart(330, 1080, 66, "#ffd6e4", "#ff7aa6");
+        doodleStar(2060, 330, 52, "#ffe680", "#f0a93a", 0.2);
+        doodleStar(215, 760, 40, "#ffe680", "#f0a93a", -0.3);
+        doodleStar(1880, 640, 34, "#c7b3ff", "#9b80f0", 0.4);
+        sp(420, 230, 34, "#c7b3ff");
+        sp(1900, 250, 28, "#ffb3cc");
+        sp(560, 1110, 30, "#9ee6cf");
+        sp(1750, 1120, 36, "#ffe680");
+        sp(2150, 820, 26, "#ff8fb5");
+        // little swirls
+        g.strokeStyle = "#9ee6cf"; g.lineWidth = 7; g.lineCap = "round";
+        g.beginPath();
+        for (let a = 0; a < 9; a += 0.15) { const r = 4 + a * 4.2; g.lineTo(1960 + Math.cos(a) * r, 470 + Math.sin(a) * r); }
+        g.stroke();
+        g.strokeStyle = "#ffb3cc";
+        g.beginPath();
+        for (let a = 0; a < 9; a += 0.15) { const r = 4 + a * 4.2; g.lineTo(380 + Math.cos(-a) * r, 560 + Math.sin(-a) * r); }
+        g.stroke();
+        // confetti dots
+        const cols = ["#ff8fb5", "#ffd95a", "#9ee6cf", "#c7b3ff", "#ffb3cc"];
+        for (let i = 0; i < 70; i++) {
+          const x = 150 + rnd() * (CW - 300), y = 150 + rnd() * (CH - 300);
+          if (x > 420 && x < 1880 && y > 170 && y < 1110) continue; // keep the lettering clear
+          g.fillStyle = cols[i % cols.length];
+          g.beginPath(); g.arc(x, y, 6 + rnd() * 8, 0, TAU); g.fill();
+        }
+      }
+
+      // lettering layout (filled once fonts load)
+      const L = { line1: [], line2: [], heart: { x: 0, y: 0 } };
+      function layoutLetters() {
+        px.font = "700 290px Fredoka";
+        const t1 = "I’m sorry";
+        let w1 = 0;
+        const ws1 = [...t1].map((ch) => { const w = px.measureText(ch).width; w1 += w; return w; });
+        let x = CW / 2 - w1 / 2;
+        [...t1].forEach((ch, i) => { L.line1.push({ ch, x: x + ws1[i] / 2, w: ws1[i] }); x += ws1[i]; });
+        px.font = "700 430px Fredoka";
+        const t2 = "Zaya";
+        let w2 = 0;
+        const ws2 = [...t2].map((ch) => { const w = px.measureText(ch).width; w2 += w; return w; });
+        const heartGap = 430;
+        x = CW / 2 - (w2 + heartGap) / 2;
+        [...t2].forEach((ch, i) => { L.line2.push({ ch, x: x + ws2[i] / 2, w: ws2[i] }); x += ws2[i]; });
+        L.heart.x = x + heartGap / 2 + 10;
+        L.heart.y = 790;
+      }
+      function stickerLetter(ch, x, y, size, stops, s, rot) {
+        // berry outline, white keyline, gradient fill, gloss band
+        px.save();
+        px.translate(x, y);
+        px.rotate(rot);
+        px.scale(s, s);
+        px.font = `700 ${size}px Fredoka`;
+        px.textAlign = "center";
+        px.textBaseline = "alphabetic";
+        px.lineJoin = "round";
+        px.fillStyle = "rgba(138,30,77,0.22)";
+        px.fillText(ch, 0, size * 0.045);
+        px.strokeStyle = "#8a1e4d"; px.lineWidth = size * 0.105; px.strokeText(ch, 0, size * 0.03);
+        px.strokeStyle = "#8a1e4d"; px.lineWidth = size * 0.105; px.strokeText(ch, 0, 0);
+        px.strokeStyle = "#ffffff"; px.lineWidth = size * 0.055; px.strokeText(ch, 0, 0);
+        // gradient in the letter's own space, so every letter gets the full ramp
+        const grad = px.createLinearGradient(0, -size * 0.74, 0, size * 0.04);
+        stops.forEach(([o, c]) => grad.addColorStop(o, c));
+        px.fillStyle = grad; px.fillText(ch, 0, 0);
+        // a soft gloss on the top third
+        const gl = px.createLinearGradient(0, -size * 0.74, 0, -size * 0.3);
+        gl.addColorStop(0, "rgba(255,255,255,0.55)"); gl.addColorStop(1, "rgba(255,255,255,0)");
+        px.save();
+        px.beginPath(); px.rect(-size, -size * 0.8, size * 2, size * 0.42); px.clip();
+        px.fillStyle = gl; px.fillText(ch, 0, 0);
+        px.restore();
+        px.restore();
+      }
+      function drawPoster(t) {
+        px.clearRect(0, 0, CW, CH);
+        px.drawImage(paperBase, 0, 0);
+        // line 1
+        const y1 = 455, y2 = 965;
+        const g1 = [[0, "#ff8ab4"], [0.5, "#f5437f"], [1, "#d81b60"]];
+        const g2 = [[0, "#fff27a"], [0.45, "#ffc93d"], [1, "#ff8a1f"]];
+        L.line1.forEach((l, i) => {
+          if (l.ch === " ") return;
+          const p = prog(t, 5.34 + i * 0.045, 5.34 + i * 0.045 + 0.42);
+          if (p <= 0) return;
+          const s = E.outB(p, 2.6), rot = (1 - E.outC(p)) * (i % 2 ? 0.25 : -0.25);
+          stickerLetter(l.ch, l.x, y1, 290, g1, s, rot);
+        });
+        L.line2.forEach((l, i) => {
+          const p = prog(t, 5.8 + i * 0.075, 5.8 + i * 0.075 + 0.5);
+          if (p <= 0) return;
+          const s = E.outB(p, 3), rot = (1 - E.outC(p)) * (i % 2 ? 0.3 : -0.3);
+          stickerLetter(l.ch, l.x, y2, 430, g2, s, rot);
+        });
+        // shine sweep across "Zaya"
+        const sw = prog(t, 6.3, 6.75);
+        if (sw > 0 && sw < 1) {
+          const x0 = L.line2[0].x - 200, x1 = L.line2[3].x + 200;
+          const sx = lerp(x0, x1, E.inOutS(sw));
+          px.save();
+          px.globalCompositeOperation = "source-atop";
+          const sg = px.createLinearGradient(sx - 90, 0, sx + 90, 0);
+          sg.addColorStop(0, "rgba(255,255,255,0)"); sg.addColorStop(0.5, "rgba(255,255,255,0.85)"); sg.addColorStop(1, "rgba(255,255,255,0)");
+          px.fillStyle = sg;
+          px.beginPath(); px.moveTo(sx - 60, y2 - 380); px.lineTo(sx + 90, y2 - 380); px.lineTo(sx - 10, y2 + 40); px.lineTo(sx - 160, y2 + 40); px.closePath();
+          px.fill();
+          px.restore();
+        }
+        // glitter twinkles on and around the name
+        if (t > 6.0) {
+          const rnd = mulberry32(5);
+          for (let i = 0; i < 16; i++) {
+            const x = L.line2[0].x - 160 + rnd() * (L.line2[3].x - L.line2[0].x + 320);
+            const y = y2 - 380 + rnd() * 420;
+            const ph = rnd(), sp = 1.6 + rnd() * 1.6;
+            const k = Math.max(0, Math.sin(TAU * (t * sp + ph))) * prog(t, 6.0 + rnd() * 0.3, 6.3);
+            if (k <= 0.05) continue;
+            sparklePath2d(px, x, y, 10 + 22 * k);
+            px.fillStyle = i % 3 ? "#ffffff" : "#fff3a8";
+            px.fill();
+          }
+        }
+        posterTex.needsUpdate = true;
+      }
+
+      // ---------------------------------------------------------------- world 1: the studio
+      const s1 = new THREE.Scene();
+      s1.environment = envTex;
+      const cam = new THREE.PerspectiveCamera(30, W / H, 0.05, 200);
+      s1.add(new THREE.HemisphereLight("#fff6f2", "#ffd9cf", 1.05));
+      const key = new THREE.DirectionalLight("#fff2e8", 2.4);
+      key.position.set(-4.5, 8, 6.5);
+      key.castShadow = true;
+      key.shadow.mapSize.set(2048, 2048);
+      key.shadow.camera.left = -7; key.shadow.camera.right = 7; key.shadow.camera.top = 7; key.shadow.camera.bottom = -3;
+      key.shadow.camera.near = 1; key.shadow.camera.far = 30;
+      key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02; key.shadow.radius = 6;
+      s1.add(key);
+      const rim = new THREE.DirectionalLight("#ffd6e6", 1.6);
+      rim.position.set(4, 5, -6);
+      s1.add(rim);
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ color: "#8a3f2e", opacity: 0.16 }));
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      s1.add(floor);
+      // soft contact blob
+      const blobTex = (() => {
+        const c = document.createElement("canvas"); c.width = c.height = 256;
+        const g = c.getContext("2d");
+        const r = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+        r.addColorStop(0, "rgba(110,50,35,0.55)"); r.addColorStop(0.5, "rgba(110,50,35,0.22)"); r.addColorStop(1, "rgba(110,50,35,0)");
+        g.fillStyle = r; g.fillRect(0, 0, 256, 256);
+        return new THREE.CanvasTexture(c);
+      })();
+      const blobMat = new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false, toneMapped: false });
+      const blob = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.2), blobMat);
+      blob.rotation.x = -Math.PI / 2; blob.position.y = 0.002;
+      s1.add(blob);
+
+      const C1 = makeClawd();
+      s1.add(C1.root);
+
+      // dust puffs
+      const puffs = [];
+      for (let i = 0; i < 8; i++) {
+        const m = new THREE.Mesh(G.sphere, M.puff.clone());
+        m.visible = false;
+        s1.add(m);
+        puffs.push({ m, a: (i / 8) * TAU + 0.2, d: 0.55 + (i % 3) * 0.12 });
+      }
+
+      // the scroll: bottom rod (held), paper, roll + top rod, satin bow
+      const ROD_Y = 1.44;
+      const scroll = new THREE.Group(); s1.add(scroll);
+      const rodGeo = new THREE.CylinderGeometry(0.07, 0.07, PW + 0.34, 32); rodGeo.rotateZ(Math.PI / 2);
+      const knobGeo = new THREE.SphereGeometry(0.13, 32, 20);
+      const makeRod = () => {
+        const g = new THREE.Group();
+        const r = new THREE.Mesh(rodGeo, M.rod); r.castShadow = true; g.add(r);
+        [-1, 1].forEach((sd) => { const k = new THREE.Mesh(knobGeo, M.knob); k.position.x = sd * (PW / 2 + 0.22); k.castShadow = true; g.add(k); });
+        return g;
+      };
+      const rodBottom = makeRod(); scroll.add(rodBottom);
+      const paperGeo = new THREE.PlaneGeometry(PW, PH, 1, 1); paperGeo.translate(0, PH / 2, 0);
+      const paperMat = new THREE.MeshBasicMaterial({ map: posterTex, side: THREE.DoubleSide, toneMapped: false });
+      const paper = new THREE.Mesh(paperGeo, paperMat);
+      paper.castShadow = true; paper.receiveShadow = true;
+      scroll.add(paper);
+      const rollTex = (() => {
+        const c = document.createElement("canvas"); c.width = 512; c.height = 128;
+        const g = c.getContext("2d");
+        g.fillStyle = "#fff2f6"; g.fillRect(0, 0, 512, 128);
+        g.strokeStyle = "rgba(255,111,160,0.6)"; g.lineWidth = 10;
+        for (let x = -128; x < 640; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 128, 128); g.stroke(); }
+        const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(4, 1);
+        return tx;
+      })();
+      const rollGeo = new THREE.CylinderGeometry(0.24, 0.24, PW, 48, 1); rollGeo.rotateZ(Math.PI / 2);
+      const roll = new THREE.Mesh(rollGeo, new THREE.MeshStandardMaterial({ map: rollTex, roughness: 0.8, envMap: envTex, envMapIntensity: 0.5 }));
+      roll.castShadow = true;
+      const rollGroup = new THREE.Group(); scroll.add(rollGroup);
+      rollGroup.add(roll);
+      const rodTop = makeRod(); rollGroup.add(rodTop);
+      // bow
+      const bow = new THREE.Group(); bow.position.set(0, 0, 0.27); rollGroup.add(bow);
+      const loopGeo = new THREE.TorusGeometry(0.15, 0.055, 18, 40);
+      [-1, 1].forEach((sd) => {
+        const l = new THREE.Mesh(loopGeo, M.bow); l.scale.set(1.25, 0.8, 0.7); l.position.x = sd * 0.17; l.rotation.z = sd * 0.25; l.castShadow = true; bow.add(l);
+        const tail = new THREE.Mesh(roundedBox(0.09, 0.32, 0.05, 0.02), M.bow); tail.position.set(sd * 0.09, -0.2, 0); tail.rotation.z = sd * 0.35; bow.add(tail);
+      });
+      const knot = new THREE.Mesh(G.sphere, M.bow); knot.scale.set(0.075, 0.07, 0.06); bow.add(knot);
+      // ribbon band around the roll
+      const band = new THREE.Mesh(new THREE.TorusGeometry(0.245, 0.03, 12, 48), M.bow); band.rotation.y = Math.PI / 2; rollGroup.add(band);
+      // bow sparkle burst
+      const bowSparks = [];
+      for (let i = 0; i < 8; i++) {
+        const m = new THREE.Mesh(G.sparkle, i % 2 ? M.sparkleY : M.sparkleW); m.visible = false; scroll.add(m);
+        bowSparks.push({ m, a: (i / 8) * TAU });
+      }
+      // the 3D heart on the poster
+      const posterHeart = new THREE.Mesh(G.heart, M.heart);
+      posterHeart.castShadow = true;
+      s1.add(posterHeart);
+      const heartBurst = [];
+      for (let i = 0; i < 7; i++) {
+        const m = new THREE.Mesh(G.heart, i % 2 ? glossy("#ff8fb5") : glossy("#ffffff", { roughness: 0.35 }));
+        m.visible = false; s1.add(m);
+        heartBurst.push({ m, a: -0.4 + (i / 6) * (Math.PI + 0.8) });
+      }
+
+      // ---------------------------------------------------------------- world 2: the pink dream
+      const s2 = new THREE.Scene();
+      s2.environment = envTex;
+      s2.add(new THREE.HemisphereLight("#fff4f8", "#ffc4d8", 1.2));
+      const key2 = new THREE.DirectionalLight("#fff4ee", 2.2);
+      key2.position.set(-3.5, 7, 7);
+      key2.castShadow = true;
+      key2.shadow.mapSize.set(2048, 2048);
+      key2.shadow.camera.left = -5; key2.shadow.camera.right = 5; key2.shadow.camera.top = 5; key2.shadow.camera.bottom = -3;
+      key2.shadow.bias = -0.0004; key2.shadow.normalBias = 0.02;
+      s2.add(key2);
+      const rim2 = new THREE.DirectionalLight("#ffe0ee", 1.4);
+      rim2.position.set(3, 4, -6);
+      s2.add(rim2);
+      const C2 = makeClawd();
+      s2.add(C2.root);
+      // hugging a heart
+      const hugHeart = new THREE.Mesh(G.heart, M.heart);
+      hugHeart.position.set(0, 0.62, 0.66);
+      hugHeart.scale.setScalar(0.3);
+      hugHeart.castShadow = true;
+      C2.body.add(hugHeart);
+      const pawGeo = roundedBox(0.2, 0.17, 0.2, 0.07);
+      [-1, 1].forEach((sd) => { const p = new THREE.Mesh(pawGeo, M.clawd); p.position.set(sd * 0.3, 0.55, 0.66); p.castShadow = true; C2.body.add(p); });
+      // fluffy cloud to stand on
+      const cloudMat = new THREE.MeshPhysicalMaterial({ color: "#ffffff", roughness: 0.75, sheen: 1, sheenColor: new THREE.Color("#ffe3ee"), envMap: envTex, envMapIntensity: 0.5 });
+      const cushion = new THREE.Group(); s2.add(cushion);
+      [[0, -0.2, 0, 0.62], [-0.62, -0.28, 0.12, 0.48], [0.62, -0.28, 0.12, 0.5], [-1.05, -0.36, 0.05, 0.36], [1.05, -0.36, 0.05, 0.38], [-0.3, -0.32, 0.5, 0.42], [0.35, -0.32, 0.5, 0.42], [0, -0.3, -0.45, 0.48]].forEach(([x, y, z, r]) => {
+        const m = new THREE.Mesh(G.sphere, cloudMat); m.position.set(x, y, z); m.scale.set(r * 1.15, r * 0.72, r); m.receiveShadow = true; m.castShadow = true; cushion.add(m);
+      });
+      // backdrop heart
+      const bigHeart = new THREE.Mesh(G.heart, glossy("#ff7aa6", { roughness: 0.28 }));
+      bigHeart.position.set(0, 1.25, -2.4);
+      s2.add(bigHeart);
+      // the frame of cute things
+      const rnd2 = mulberry32(2026);
+      const stickerMats = {
+        heartA: glossy("#ff4f8b"), heartB: glossy("#ff8fb5"), heartC: glossy("#ffffff", { roughness: 0.35 }),
+        star: glossy("#ffd95a", { roughness: 0.25 }), starB: glossy("#c7b3ff", { roughness: 0.25 }),
+        cloud: cloudMat, candy: glossy("#9ee6cf"), candyB: glossy("#ffb3cc"), petal: glossy("#c7b3ff", { roughness: 0.4 }), center: glossy("#ffd95a"),
+        balloon: glossy("#ff6f9f", { roughness: 0.18 }), string: new THREE.MeshBasicMaterial({ color: "#ffffff" }),
+      };
+      function makeThing(kind) {
+        const g = new THREE.Group();
+        if (kind === "heartA" || kind === "heartB" || kind === "heartC") g.add(new THREE.Mesh(G.heart, stickerMats[kind]));
+        else if (kind === "star" || kind === "starB") g.add(new THREE.Mesh(G.star, stickerMats[kind]));
+        else if (kind === "cloud") {
+          [[0, 0, 0, 0.55], [-0.5, -0.12, 0, 0.4], [0.5, -0.1, 0, 0.42], [0.2, 0.25, 0, 0.38], [-0.25, 0.2, 0, 0.36]].forEach(([x, y, z, r]) => { const m = new THREE.Mesh(G.sphere, cloudMat); m.position.set(x, y, z); m.scale.set(r, r * 0.9, r * 0.8); g.add(m); });
+          // a sleepy little face
+          [-0.16, 0.16].forEach((x) => { const e = new THREE.Mesh(G.sphere, M.ink); e.scale.set(0.045, 0.06, 0.03); e.position.set(x, 0.02, 0.45); g.add(e); });
+          [-0.3, 0.3].forEach((x) => { const b = new THREE.Mesh(new THREE.CircleGeometry(0.06, 20), M.blush.clone()); b.material.opacity = 0.8; b.scale.x = 1.5; b.position.set(x, -0.08, 0.452); g.add(b); });
+          g.scale.setScalar(0.85);
+        } else if (kind === "candy" || kind === "candyB") {
+          const b = new THREE.Mesh(G.sphere, stickerMats[kind]); b.scale.set(0.42, 0.34, 0.34); g.add(b);
+          [-1, 1].forEach((sd) => { const w = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.34, 24), stickerMats[kind === "candy" ? "candyB" : "candy"]); w.rotation.z = sd * Math.PI / 2; w.position.x = sd * 0.5; g.add(w); });
+        } else if (kind === "flower") {
+          for (let i = 0; i < 5; i++) { const a = (i / 5) * TAU; const pt = new THREE.Mesh(G.sphere, stickerMats.petal); pt.scale.set(0.3, 0.3, 0.16); pt.position.set(Math.cos(a) * 0.34, Math.sin(a) * 0.34, 0); g.add(pt); }
+          const ctr = new THREE.Mesh(G.sphere, stickerMats.center); ctr.scale.set(0.22, 0.22, 0.18); ctr.position.z = 0.08; g.add(ctr);
+        } else if (kind === "balloon") {
+          const b = new THREE.Mesh(G.heart, stickerMats.balloon); b.scale.set(0.95, 1.05, 1.1); g.add(b);
+          const s = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.4, 6), stickerMats.string); s.position.y = -1.6; g.add(s);
+        }
+        g.traverse((o) => { if (o.isMesh) o.castShadow = false; });
+        return g;
+      }
+      const ringKinds = ["heartA", "star", "cloud", "heartB", "candy", "flower", "heartC", "starB", "balloon", "heartA", "candyB", "star", "cloud", "heartB", "flower", "heartC", "star", "candy", "heartA", "starB", "balloon", "heartB", "cloud", "flower"];
+      const things = ringKinds.map((kind, i) => {
+        const a = Math.PI / 2 + (i / ringKinds.length) * TAU + (rnd2() - 0.5) * 0.12;
+        const rx = 4.35 + (rnd2() - 0.5) * 0.4, ry = 2.45 + (rnd2() - 0.5) * 0.3;
+        let x = Math.cos(a) * rx, y = 1.15 + Math.sin(a) * ry;
+        if (y > 2.2 && Math.abs(x) < 3.6) y = 3.72 + (rnd2() - 0.5) * 0.1; // the title owns this band
+        const z = -0.6 + rnd2() * 1.6;
+        const g = makeThing(kind);
+        const base = (kind === "cloud" ? 0.5 : kind === "balloon" ? 0.34 : 0.32) + rnd2() * 0.14;
+        g.position.set(x, y, z);
+        s2.add(g);
+        return { g, kind, base, x, y, z, rot: (rnd2() - 0.5) * 0.9, spin: (rnd2() < 0.5 ? -1 : 1) * (0.25 + rnd2() * 0.35), ph: rnd2(), order: Math.abs(Math.atan2(Math.cos(a), Math.sin(a))) };
+      });
+      const thingOrder = [...things].sort((a, b) => a.order - b.order);
+      thingOrder.forEach((th, i) => (th.delay = 0.28 + i * 0.03));
+      // falling confetti hearts
+      const confMats = ["#ff4f8b", "#ff8fb5", "#ffffff", "#ffd95a", "#c7b3ff"].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.4, side: THREE.DoubleSide, transparent: true, opacity: 0 }));
+      const confetti = [];
+      for (let i = 0; i < 46; i++) {
+        const m = new THREE.Mesh(i % 4 === 3 ? G.sparkle : G.flatHeart, confMats[i % confMats.length]);
+        const s = 0.06 + rnd2() * 0.07;
+        m.scale.setScalar(s);
+        s2.add(m);
+        confetti.push({ m, x: (rnd2() - 0.5) * 9.5, y0: -1.8 + rnd2() * 6.8, z: -1.2 + rnd2() * 2.6, v: 0.45 + rnd2() * 0.5, rx: rnd2() * TAU, ry: rnd2() * TAU, sx: 1.5 + rnd2() * 2.5, sy: 1 + rnd2() * 2, sway: 0.1 + rnd2() * 0.2, ph: rnd2() * TAU });
+      }
+      // twinkling sparkles
+      const twinkles = [];
+      for (let i = 0; i < 14; i++) {
+        const m = new THREE.Mesh(G.sparkle, i % 3 ? M.sparkleW : M.sparkleY);
+        m.position.set((rnd2() - 0.5) * 8, -0.6 + rnd2() * 3.8, -0.8 + rnd2());
+        s2.add(m);
+        twinkles.push({ m, s: 0.06 + rnd2() * 0.08, ph: rnd2(), sp: 0.9 + rnd2() * 1.2 });
+      }
+      // little hearts that float up from the hug
+      const minis = [0, 1, 2].map((i) => { const m = new THREE.Mesh(G.heart, i === 1 ? glossy("#ffffff", { roughness: 0.35 }) : glossy("#ff5c93")); m.visible = false; s2.add(m); return m; });
+
+      // ---------------------------------------------------------------- HTML overlay handles
+      const bg2 = document.getElementById("f-bg2");
+      const rays = document.getElementById("f-rays");
+      const veil = document.getElementById("f-veil");
+      const irisPath = document.getElementById("f-irisPath");
+      const words = ["f-w1", "f-w2", "f-w3"].map((id) => document.getElementById(id));
+      const tHeart = document.getElementById("f-tHeart");
+      function irisD(s) {
+        const cx = 960, cy = 610, k = s / 100;
+        const X = (x) => (cx + (x - 50) * k).toFixed(1), Y = (y) => (cy + (y - 45) * k).toFixed(1);
+        return `M-10 -10H1930V1090H-10Z M${X(50)} ${Y(88)} C${X(20)} ${Y(66)} ${X(2)} ${Y(48)} ${X(2)} ${Y(28)} C${X(2)} ${Y(13)} ${X(13)} ${Y(2)} ${X(27)} ${Y(2)} C${X(37)} ${Y(2)} ${X(45)} ${Y(8)} ${X(50)} ${Y(17)} C${X(55)} ${Y(8)} ${X(63)} ${Y(2)} ${X(73)} ${Y(2)} C${X(87)} ${Y(2)} ${X(98)} ${Y(13)} ${X(98)} ${Y(28)} C${X(98)} ${Y(48)} ${X(80)} ${Y(66)} ${X(50)} ${Y(88)}Z`;
+      }
+
+      // ---------------------------------------------------------------- the film
+      const SWITCH = 7.42;
+      const tmpV = new THREE.Vector3(), tmpV2 = new THREE.Vector3();
+
+      function studioCamera(t) {
+        const pos = track(t, [
+          [0, [-2.15, 0.92, 6.6]],
+          [1.45, [-2.05, 0.94, 6.5], E.inOutS],
+          [3.5, [0, 1.0, 6.3], E.inOutS],
+          [4.3, [0, 1.02, 6.1], E.inOutS],
+          [5.4, [0, 2.36, 9.5], E.inOutC],
+          [6.85, [0, 2.34, 9.2], E.inOutS],
+        ]);
+        const tgt = track(t, [
+          [0, [-2.15, 0.5, 0]],
+          [1.45, [-2.05, 0.52, 0], E.inOutS],
+          [3.5, [0, 0.62, 0], E.inOutS],
+          [4.3, [0, 0.72, 0], E.inOutS],
+          [5.4, [0, 2.3, 0], E.inOutC],
+          [6.85, [0, 2.3, 0], E.inOutS],
+        ]);
+        cam.position.set(pos[0], pos[1], pos[2]);
+        cam.lookAt(tgt[0], tgt[1], tgt[2]);
+      }
+
+      function studioClawd(t) {
+        const p = { x: -2.3, z: 0, eyes: "n" };
+        // 1. peek, dip, spring up, land
+        p.hopY = track(t, [[0, -1.84], [0.24, -1.84], [0.36, -2.1, E.outQ], [0.76, 0.92, E.outC], [0.98, 0, E.inQ]]);
+        let sq = track(t, [[0, 1], [0.24, 1], [0.36, 0.84, E.outQ], [0.48, 1.2, E.outQ], [0.76, 1.0, E.inOutS], [0.9, 1.08, E.inQ], [0.98, 1.0, E.lin]]);
+        if (t > 0.98) sq = 1 - 0.27 * Math.min(1, (t - 0.98) / 0.045) * Math.exp(-6.5 * (t - 0.98)) * Math.cos(15 * (t - 0.98));
+        p.armL = track(t, [[0.36, 0], [0.5, -0.5, E.outQ], [0.8, 0.3, E.inOutS], [1.0, 0, E.inOutS]]);
+        p.armR = -p.armL;
+        // 2. looks toward centre, then waddles there
+        const W0 = 1.45, W1 = 3.45, N = 8, ST = (W1 - W0) / N;
+        p.rotY = track(t, [[1.12, 0], [1.38, 0.62, (q) => E.outB(q, 2)], [3.45, 0.62], [3.75, -0.08, E.outC], [3.95, 0, E.inOutS]]);
+        p.lookX = track(t, [[1.1, 0], [1.22, 0.05, E.outQ], [3.45, 0.05], [3.62, 0, E.outQ]]);
+        p.x = track(t, [[W0, -2.3], [W1, 0, E.inOutS]]);
+        p.legs = [0, 0, 0, 0];
+        p.bob = 0;
+        p.leanZ = 0;
+        if (t > W0 && t < W1) {
+          const s = (t - W0) / ST, k = Math.floor(s), ph = s - k;
+          const env = Math.min(1, (t - W0) / 0.12, (W1 - t) / 0.12);
+          const lift = Math.sin(Math.PI * ph) * 0.1 * env;
+          if (k % 2 === 0) { p.legs[0] = lift; p.legs[2] = lift; } else { p.legs[1] = lift; p.legs[3] = lift; }
+          p.bob = Math.abs(Math.sin(Math.PI * ph)) * 0.05 * env;
+          p.leanZ = -0.07 * env + Math.sin(Math.PI * s) * 0.035 * env;
+          p.armL += Math.sin(Math.PI * s) * 0.32 * env;
+          p.armR += Math.sin(Math.PI * s) * 0.32 * env;
+          sq = 1 + Math.sin(TAU * ph) * 0.02 * env;
+        }
+        // follow-through when it stops
+        p.leanZ += ring(t, W1, 0.09, 6, 12, 0.06);
+        // 3. shy fidget
+        const fid = prog(t, 3.75, 4.05);
+        if (fid > 0 && fid < 1) {
+          const f = Math.sin(Math.PI * fid);
+          p.armL += 0.35 * f * Math.sin(TAU * 2 * fid);
+          p.armR -= 0.35 * f * Math.sin(TAU * 2 * fid + 1);
+          p.lookY = -0.035 * f;
+        }
+        p.blink = blinkAt(t, [0.12, 1.3, 3.9, 6.95]);
+        // 4. the yank: crouch + reach behind, then everything shoots up
+        const Y0 = 4.05, Y1 = 4.24;
+        if (t > Y0) {
+          sq = track(t, [[Y0, sq], [Y1, 0.86, E.outQ], [Y1 + 0.12, 1.12, E.outQ], [Y1 + 0.3, 1.0, E.inOutS]]);
+          if (t > Y1 + 0.3) sq = 1 + ring(t, Y1 + 0.3, -0.04, 6, 12);
+          p.rotY = track(t, [[Y0, 0], [Y1, -0.28, E.outQ], [Y1 + 0.2, 0.03, E.outQ], [Y1 + 0.4, 0, E.inOutS]]);
+          p.armR = track(t, [[Y0, 0], [Y1, 0.75, E.outQ], [Y1 + 0.24, 1.36, (q) => E.outB(q, 1.6)]]);
+          p.armRy = track(t, [[Y0, 0], [Y1, -1.1, E.outQ], [Y1 + 0.16, 0, E.outQ]]);
+          p.armL = track(t, [[Y0, 0], [Y1, 0.2, E.outQ], [Y1 + 0.27, -1.36, (q) => E.outB(q, 1.6)]]);
+          const reach = track(t, [[Y1, 1], [Y1 + 0.26, 2.6, (q) => E.outB(q, 1.5)]]);
+          p.armLs = p.armRs = reach;
+          p.lookY = track(t, [[Y0, 0], [Y1 + 0.1, 0.03], [Y1 + 0.35, 0.0]]);
+        }
+        // weight of the unroll
+        if (t > 4.78) sq += ring(t, 4.78, -0.035, 5, 10, 0.1);
+        // 5. apology face
+        if (t > 5.38) {
+          p.eyes = "p";
+          sq += ring(t, 5.38, -0.05, 7, 14, 0.04);
+          p.blush = prog(t, 5.48, 5.9);
+          p.sad = true;
+          p.tear = prog(t, 6.05, 6.62);
+          // nervous tremble while holding it up
+          const env = prog(t, 5.55, 5.75) * (1 - prog(t, 6.75, 6.9));
+          p.leanZ += Math.sin(TAU * 7.5 * t) * 0.012 * env;
+          p.lookX = 0;
+        }
+        p.sqY = sq;
+        p.leanX = t > 5.38 ? -0.04 : 0;
+        return p;
+      }
+
+      function studio(t) {
+        studioCamera(t);
+        const p = studioClawd(t);
+        poseClawd(C1, p);
+        // contact blob follows, shrinks while airborne
+        const air = Math.max(0, p.hopY);
+        blob.position.x = p.x;
+        const bs = p.hopY < -0.8 ? 0 : clamp(1 - air * 0.55) * clamp((p.hopY + 0.8) / 0.8);
+        blob.scale.set(bs * (2 - p.sqY), bs, 1);
+        blobMat.opacity = 0.9 * bs;
+        // puffs on landing
+        const pp = prog(t, 0.98, 1.55);
+        puffs.forEach((pf) => {
+          pf.m.visible = pp > 0 && pp < 1;
+          if (!pf.m.visible) return;
+          const d = pf.d * E.outC(pp);
+          pf.m.position.set(-2.3 + Math.cos(pf.a) * (0.75 + d), 0.08 + 0.12 * E.outQ(pp), Math.sin(pf.a) * (0.45 + d * 0.6));
+          pf.m.scale.setScalar(0.06 + 0.16 * E.outQ(pp));
+          pf.m.material.opacity = 0.85 * (1 - E.inQ(pp));
+        });
+        // ---- scroll
+        const Y1 = 4.24;
+        const e = prog(t, Y1, Y1 + 0.38);
+        scroll.visible = t > Y1 - 0.02;
+        const shake = t > 5.55 ? Math.sin(TAU * 7.5 * t) * 0.006 * prog(t, 5.55, 5.75) * (1 - prog(t, 6.75, 6.9)) : 0;
+        if (scroll.visible) {
+          const q = E.outB(e, 1.5);
+          // swings up from behind Clawd in an arc
+          const bx = lerp(0.55, 0, E.outQ(e));
+          const by = lerp(0.65, ROD_Y, q) + Math.sin(Math.PI * e) * 0.35;
+          const bz = lerp(-0.85, 0.08, E.outC(e));
+          scroll.position.set(bx, by + (sq_unroll(t)), bz);
+          scroll.rotation.set(lerp(0.4, 0, E.outC(e)), 0, lerp(1.35, 0, q) + shake * 2);
+          scroll.scale.set(lerp(0.32, 1, q), 1, 1);
+        }
+        // unroll
+        const U0 = 4.8, U1 = 5.42;
+        let f = 0;
+        if (t > U0) {
+          const u = prog(t, U0, U1);
+          f = Math.min(1.0, E.outB(u, 1.25));
+          if (t > U1) f = 1;
+        }
+        paper.visible = f > 0.001;
+        paper.scale.y = Math.max(0.001, f);
+        posterTex.repeat.set(1, Math.max(0.001, f));
+        const r = lerp(1, 0.18, E.outQ(Math.min(1, f)));
+        rollGroup.position.y = f * PH;
+        roll.scale.set(1, r, r);
+        roll.rotation.x = -(f * PH) / (0.24 * Math.max(0.3, r));
+        roll.visible = r > 0.2;
+        band.visible = t < 4.66;
+        // bow pops off
+        const bp = prog(t, 4.6, 4.78);
+        bow.visible = bp < 1;
+        bow.scale.setScalar(bp < 0.35 ? 1 + 0.35 * E.outQ(bp / 0.35) : 1.35 * (1 - E.inQ((bp - 0.35) / 0.65)));
+        const sp = prog(t, 4.66, 5.1);
+        bowSparks.forEach((b) => {
+          b.m.visible = sp > 0 && sp < 1;
+          if (!b.m.visible) return;
+          const d = 0.25 + 0.75 * E.outC(sp);
+          b.m.position.set(Math.cos(b.a) * d, Math.sin(b.a) * d * 0.8, 0.35);
+          b.m.scale.setScalar(0.11 * Math.sin(Math.PI * sp));
+          b.m.rotation.z = b.a + sp * 2;
+        });
+        if (t > 5.2) drawPoster(t);
+        // ---- the 3D heart on the poster
+        const hx = (L.heart.x / CW - 0.5) * PW, hy = (1 - L.heart.y / CH) * PH;
+        scroll.updateMatrixWorld(true);
+        const anchor = tmpV.set(hx, hy, 0.2).applyMatrix4(scroll.matrixWorld);
+        const hp = prog(t, 6.08, 6.6);
+        let hs = 0.3 * E.elastic(hp, 0.42);
+        // two beats
+        [6.42, 6.66].forEach((bt) => { hs *= 1 + 0.2 * Math.max(0, Math.sin(Math.PI * prog(t, bt, bt + 0.2))); });
+        posterHeart.visible = hp > 0;
+        posterHeart.position.copy(anchor);
+        posterHeart.rotation.set(0, (1 - E.outC(hp)) * -Math.PI, 0);
+        posterHeart.scale.setScalar(hs);
+        // the leap into the lens
+        const L0 = 6.86, L1 = 6.98, L2 = SWITCH;
+        if (t > L0) {
+          const a = prog(t, L0, L1);
+          const squashK = Math.sin(Math.PI * a) * 0.25;
+          posterHeart.scale.set(0.3 * (1 + squashK), 0.3 * (1 - squashK * 0.6), 0.3 * (1 - squashK));
+        }
+        if (t > L1) {
+          const l = prog(t, L1, L2);
+          cam.getWorldDirection(tmpV2);
+          const dest = tmpV2.multiplyScalar(0.62).add(cam.position);
+          const k = E.inC(l);
+          posterHeart.position.lerpVectors(anchor, dest, k);
+          posterHeart.position.y += Math.sin(Math.PI * l) * 0.5;
+          posterHeart.rotation.set(0, TAU * E.inOutC(l), Math.sin(Math.PI * l) * 0.3);
+          posterHeart.scale.setScalar(lerp(0.3, 0.95, E.inQ(l)));
+        }
+        // little hearts burst when it lands on the poster
+        const hb = prog(t, 6.12, 6.85);
+        heartBurst.forEach((b, i) => {
+          b.m.visible = hb > 0 && hb < 1;
+          if (!b.m.visible) return;
+          const d = 0.25 + 0.95 * E.outC(hb);
+          b.m.position.set(anchor.x + Math.cos(b.a) * d, anchor.y + Math.sin(b.a) * d * 0.9 + 0.3 * hb, anchor.z + 0.1);
+          b.m.scale.setScalar(0.09 * Math.sin(Math.PI * Math.min(1, hb * 1.15)) * (i % 2 ? 0.8 : 1));
+          b.m.rotation.set(0, hb * 3 * (i % 2 ? 1 : -1), Math.cos(b.a) * 0.4);
+        });
+      }
+      function sq_unroll(t) {
+        // the rod dips with the weight of the poster, and springs back
+        return t > 4.8 ? ring(t, 4.8, -0.05, 5, 10, 0.1) : 0;
+      }
+
+      function dream(t) {
+        const tf = t - SWITCH;
+        // camera pulls back from the hug to the whole dream
+        const pos = track(tf, [[0, [0, 0.82, 3.3]], [1.25, [0, 1.15, 10.4], E.outE], [2.6, [0, 1.15, 10.1], E.inOutS]]);
+        const tgt = track(tf, [[0, [0, 0.72, 0]], [1.25, [0, 1.12, 0], E.outE]]);
+        cam.position.set(pos[0], pos[1], pos[2]);
+        cam.lookAt(tgt[0], tgt[1], tgt[2]);
+        // Clawd: ^ ^ eyes, hop, squeezes
+        const p = { x: 0, z: 0.1, eyes: "h", blush: 1 };
+        p.hopY = track(tf, [[1.15, 0], [1.38, 0.42, E.outQ], [1.6, 0, E.inQ]]);
+        let sq = track(tf, [[1.0, 1], [1.15, 0.86, E.outQ], [1.3, 1.12, E.outQ], [1.5, 1.0, E.inOutS]]);
+        if (tf > 1.6) sq = 1 - 0.2 * Math.min(1, (tf - 1.6) / 0.04) * Math.exp(-6.5 * (tf - 1.6)) * Math.cos(15 * (tf - 1.6));
+        p.sqY = sq;
+        p.leanZ = Math.sin(TAU * 0.55 * Math.max(0, tf - 2.0)) * 0.06 * prog(tf, 2.0, 2.2);
+        p.armL = 0.9; p.armR = -0.9; p.armLs = p.armRs = 0.001;
+        poseClawd(C2, p);
+        C2.root.position.y = 0.06;
+        let hug = 1;
+        [1.75, 2.05].forEach((bt) => { hug *= 1 + 0.18 * Math.max(0, Math.sin(Math.PI * prog(tf, bt, bt + 0.22))); });
+        hugHeart.scale.setScalar(0.3 * hug);
+        hugHeart.rotation.y = Math.sin(TAU * 0.4 * tf) * 0.2;
+        cushion.scale.set(1, 1 + ring(tf, 1.6, -0.08, 6, 12), 1);
+        // backdrop heart
+        const bh = prog(tf, 0.05, 0.75);
+        bigHeart.scale.setScalar(1.4 * E.elastic(bh, 0.45));
+        bigHeart.rotation.set(0, Math.sin(TAU * 0.25 * tf) * 0.22, Math.sin(TAU * 0.18 * tf) * 0.04);
+        // ring of cute things
+        things.forEach((th) => {
+          const pIn = prog(tf, th.delay, th.delay + 0.55);
+          const s = th.base * E.outB(pIn, 2.2);
+          th.g.visible = pIn > 0;
+          th.g.scale.setScalar(Math.max(0.0001, s));
+          th.g.position.set(th.x, th.y + Math.sin(TAU * (0.45 * tf + th.ph)) * 0.05, th.z);
+          th.g.rotation.set(Math.sin(TAU * (0.3 * tf + th.ph)) * 0.12, Math.sin(TAU * (0.22 * tf + th.ph)) * 0.45 * Math.sign(th.spin) + (1 - E.outC(pIn)) * 1.5, th.rot);
+        });
+        // confetti
+        const cf = prog(tf, 0.15, 0.6);
+        confMats.forEach((m) => (m.opacity = cf));
+        confetti.forEach((c) => {
+          let y = c.y0 - c.v * tf;
+          y = ((((y + 2.2) % 7.0) + 7.0) % 7.0) - 2.2;
+          c.m.position.set(c.x + Math.sin(tf * 2 + c.ph) * c.sway, y, c.z);
+          c.m.rotation.set(c.rx + tf * c.sx, c.ry + tf * c.sy, tf);
+        });
+        twinkles.forEach((w) => {
+          const k = Math.max(0, Math.sin(TAU * (tf * w.sp + w.ph)));
+          w.m.scale.setScalar(Math.max(0.0001, w.s * k * prog(tf, 0.4, 0.8)));
+          w.m.rotation.z = tf * 0.8;
+          w.m.lookAt(cam.position);
+        });
+        // little hearts float up from the squeeze
+        minis.forEach((m, i) => {
+          const q = prog(tf, 1.8 + i * 0.12, 2.6 + i * 0.12);
+          m.visible = q > 0 && q < 1;
+          if (!m.visible) return;
+          m.position.set((i - 1) * 0.35 + Math.sin(q * 5 + i) * 0.08, 1.35 + q * 1.1, 0.7);
+          m.scale.setScalar(0.11 * Math.sin(Math.PI * q) * (i === 1 ? 0.8 : 1));
+          m.rotation.y = q * 2;
+        });
+      }
+
+      function overlays(t) {
+        const tf = t - SWITCH;
+        // white studio -> pink dream
+        document.getElementById("f-bg1").style.opacity = t < SWITCH ? "1" : "0";
+        bg2.style.opacity = t < SWITCH ? "0" : "1";
+        rays.style.transform = `rotate(${(Math.max(0, tf) * 4).toFixed(3)}deg)`;
+        // the heart fills the lens -> flat pink
+        veil.style.opacity = String(t < SWITCH ? prog(t, 7.3, SWITCH) : 0);
+        // heart-shaped iris opens on the dream
+        const ip = prog(tf, 0.0, 0.5);
+        if (t >= SWITCH && ip < 1) {
+          irisPath.setAttribute("d", irisD(lerp(170, 4200, E.inOutS(ip) * 0.35 + E.inC(ip) * 0.65)));
+          irisPath.style.display = "";
+        } else {
+          irisPath.style.display = "none";
+        }
+        // title, word by word, then the heart
+        words.forEach((w, i) => {
+          const q = prog(tf, 0.42 + i * 0.1, 0.42 + i * 0.1 + 0.5);
+          w.style.opacity = String(clamp(q * 4));
+          const s = q > 0 ? E.outB(q, 2.4) : 0;
+          w.style.transform = `translateY(${((1 - E.outC(q)) * 40).toFixed(1)}px) scale(${s.toFixed(4)}) rotate(${((1 - E.outC(q)) * (i % 2 ? 9 : -9)).toFixed(2)}deg)`;
+        });
+        const hq = prog(tf, 0.75, 1.45);
+        tHeart.style.opacity = String(clamp(hq * 5));
+        let hs = E.elastic(hq, 0.42);
+        [1.75, 2.05].forEach((bt) => { hs *= 1 + 0.14 * Math.max(0, Math.sin(Math.PI * prog(tf, bt, bt + 0.22))); });
+        tHeart.style.transform = `scale(${hs.toFixed(4)}) rotate(${((1 - E.outC(hq)) * -25).toFixed(2)}deg)`;
+      }
+
+      let ready = false;
+      function render(t) {
+        t = clamp(t, 0, DURATION);
+        if (!ready) return;
+        overlays(t);
+        if (t < SWITCH) {
+          studio(t);
+          renderer.render(s1, cam);
+        } else {
+          dream(t);
+          renderer.render(s2, cam);
+        }
+      }
+
+      // ---------------------------------------------------------------- build + timeline
+      const buildReady = document.fonts.load("700 120px Fredoka").then(() => document.fonts.ready).then(() => {
+        buildPaper();
+        layoutLetters();
+        drawPoster(0);
+        renderer.compile(s1, cam);
+        renderer.compile(s2, cam);
+        ready = true;
+        render(tl.time());
+      });
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady.film = buildReady;
+
+      const tl = gsap.timeline({ paused: true, onUpdate: () => render(tl.time()) });
+      tl.to({ v: 0 }, { v: 1, duration: DURATION, ease: "none" }, 0);
+      window.addEventListener("hf-seek", (e) => {
+        const d = e && e.detail;
+        if (!d || typeof d.time !== "number") return;
+        render(d.time);
+        if (typeof d.waitUntil === "function") d.waitUntil(buildReady);
+      });
+      window.__timelines["film"] = tl;
+    })();
+  </script>
+</template>
