@@ -77,3 +77,11 @@ resource/**
 web/static/brand_black.png
 web/static/brand_white.png
 web/static/logo.png
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
