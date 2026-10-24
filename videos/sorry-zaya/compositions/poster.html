@@ -1,0 +1,378 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      overflow: hidden;
+      font-family: "Nunito", sans-serif;
+    }
+    #p-stage,
+    #p-world,
+    #p-heartClip {
+      position: absolute;
+      inset: 0;
+    }
+    /* soft warm floor glow so white never reads as empty */
+    #p-floor {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      background: radial-gradient(ellipse 1100px 260px at 960px 930px, #fff4ef 0%, #ffffff 70%);
+    }
+
+    /* ---------- poster ---------- */
+    #p-posterRig {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+    }
+    #p-paper {
+      position: absolute;
+      left: 370px;
+      top: 60px;
+      width: 1180px;
+      height: 570px;
+      background: #fffbf4;
+      border-radius: 10px;
+      box-shadow:
+        0 18px 40px rgba(150, 70, 60, 0.14),
+        inset 0 0 0 2px #f6e6d3;
+      overflow: hidden;
+    }
+    #p-paperBorder {
+      position: absolute;
+      inset: 28px;
+      border: 6px dashed #ffc2d3;
+      border-radius: 26px;
+    }
+    .p-line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    #p-line1 {
+      top: 70px;
+      text-align: center;
+      font-size: 160px;
+      color: #3b2620;
+      letter-spacing: -2px;
+    }
+    #p-line2 {
+      top: 250px;
+      height: 260px;
+    }
+    #p-name {
+      position: absolute;
+      right: 420px; /* right edge at x = 1130 on the frame */
+      top: 0;
+      font-size: 240px;
+      color: #ff4f86;
+      letter-spacing: -3px;
+      line-height: 1;
+    }
+    .p-word,
+    .p-letter {
+      display: inline-block;
+    }
+    .p-doodle {
+      position: absolute;
+    }
+    .p-roll {
+      position: absolute;
+      top: 40px;
+      width: 56px;
+      height: 610px;
+      border-radius: 28px;
+      background: linear-gradient(90deg, #d9b994 0%, #f7e7d2 30%, #fff8ee 48%, #ecd5b8 75%, #c9a57d 100%);
+      box-shadow: 0 10px 24px rgba(120, 70, 40, 0.18);
+    }
+    #p-rollL {
+      left: 342px;
+    }
+    #p-rollR {
+      left: 1522px;
+    }
+    .p-cap {
+      position: absolute;
+      left: 6px;
+      width: 44px;
+      height: 18px;
+      border-radius: 9px;
+      background: #ff7aa2;
+    }
+
+    /* ---------- mascot ---------- */
+    #p-rig {
+      position: absolute;
+      left: 760px;
+      top: 665px;
+      width: 400px;
+      height: 300px;
+    }
+    #p-shadow {
+      position: absolute;
+      left: 70px;
+      top: 228px;
+      width: 260px;
+      height: 34px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(120, 60, 40, 0.22) 0%, rgba(120, 60, 40, 0) 70%);
+    }
+    #p-hop {
+      position: absolute;
+      inset: 0;
+    }
+    #p-mascot {
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: visible;
+    }
+    .p-puff {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f1e7e1;
+    }
+
+    /* ---------- the heart that becomes the world ---------- */
+    #p-heart {
+      position: absolute;
+      left: 1170px;
+      top: 365px;
+      width: 160px;
+      height: 144px;
+      overflow: visible;
+    }
+  </style>
+
+  <div id="root" data-composition-id="poster" data-width="1920" data-height="1080">
+    <div id="p-stage" class="clip" data-start="0" data-duration="7.4" data-layout-allow-overflow data-layout-allow-overlap>
+      <div id="p-world">
+      <div id="p-floor"></div>
+
+      <div id="p-posterRig">
+        <div id="p-paper">
+          <div id="p-paperBorder"></div>
+          <!-- little doodles on the paper -->
+          <svg class="p-doodle" style="left: 70px; top: 64px" width="54" height="54" viewBox="0 0 100 100">
+            <path d="M50 0 C55 35 65 45 100 50 C65 55 55 65 50 100 C45 65 35 55 0 50 C35 45 45 35 50 0Z" fill="#ffd34d" />
+          </svg>
+          <svg class="p-doodle" style="left: 1060px; top: 70px" width="46" height="42" viewBox="0 0 100 90">
+            <path d="M50 88 C20 66 2 48 2 28 C2 13 13 2 27 2 C37 2 45 8 50 17 C55 8 63 2 73 2 C87 2 98 13 98 28 C98 48 80 66 50 88Z" fill="#ffb3c9" />
+          </svg>
+          <svg class="p-doodle" style="left: 84px; top: 470px" width="40" height="36" viewBox="0 0 100 90">
+            <path d="M50 88 C20 66 2 48 2 28 C2 13 13 2 27 2 C37 2 45 8 50 17 C55 8 63 2 73 2 C87 2 98 13 98 28 C98 48 80 66 50 88Z" fill="#ffb3c9" />
+          </svg>
+          <svg class="p-doodle" style="left: 1074px; top: 466px" width="44" height="44" viewBox="0 0 100 100">
+            <path d="M50 0 C55 35 65 45 100 50 C65 55 55 65 50 100 C45 65 35 55 0 50 C35 45 45 35 50 0Z" fill="#c4b0ff" />
+          </svg>
+
+          <div id="p-line1" class="p-line">
+            <span id="p-w1" class="p-word">I’m</span>
+            <span id="p-w2" class="p-word">sorry</span>
+          </div>
+          <div id="p-line2" class="p-line">
+            <div id="p-name"><span id="p-l1" class="p-letter">Z</span><span id="p-l2" class="p-letter">a</span><span id="p-l3" class="p-letter">y</span><span id="p-l4" class="p-letter">a</span></div>
+          </div>
+        </div>
+        <div id="p-rollL" class="p-roll"><div class="p-cap" style="top: -4px"></div><div class="p-cap" style="bottom: -4px"></div></div>
+        <div id="p-rollR" class="p-roll"><div class="p-cap" style="top: -4px"></div><div class="p-cap" style="bottom: -4px"></div></div>
+      </div>
+
+      <div id="p-rig">
+        <div id="p-shadow"></div>
+        <div class="p-puff" id="p-puff1" style="left: 70px; top: 214px"></div>
+        <div class="p-puff" id="p-puff2" style="left: 40px; top: 200px; width: 24px; height: 24px"></div>
+        <div class="p-puff" id="p-puff3" style="left: 300px; top: 214px"></div>
+        <div class="p-puff" id="p-puff4" style="left: 336px; top: 202px; width: 24px; height: 24px"></div>
+        <div id="p-hop">
+          <svg id="p-mascot" width="400" height="300" viewBox="0 0 160 120">
+            <g id="p-squash">
+              <!-- legs -->
+              <rect id="p-leg1" x="30" y="72" width="12" height="26" rx="3" fill="#d97757" />
+              <rect id="p-leg2" x="50" y="72" width="12" height="26" rx="3" fill="#c96a4b" />
+              <rect id="p-leg3" x="98" y="72" width="12" height="26" rx="3" fill="#c96a4b" />
+              <rect id="p-leg4" x="118" y="72" width="12" height="26" rx="3" fill="#d97757" />
+              <g id="p-body">
+                <!-- arms (drawn under the body so the shoulder joint hides) -->
+                <g id="p-armL"><rect x="3" y="36" width="24" height="15" rx="7" fill="#d97757" /></g>
+                <g id="p-armR"><rect x="133" y="36" width="24" height="15" rx="7" fill="#d97757" /></g>
+                <rect x="20" y="10" width="120" height="68" rx="12" fill="#d97757" />
+                <rect x="30" y="16" width="46" height="8" rx="4" fill="#ffffff" opacity="0.2" />
+                <g id="p-blush" opacity="0">
+                  <ellipse cx="37" cy="58" rx="9" ry="5" fill="#ff8fab" />
+                  <ellipse cx="123" cy="58" rx="9" ry="5" fill="#ff8fab" />
+                </g>
+                <g id="p-eyes">
+                  <g id="p-eyeN">
+                    <rect id="p-eyeL" x="50" y="29" width="11" height="22" rx="3" fill="#24150f" />
+                    <rect id="p-eyeR" x="99" y="29" width="11" height="22" rx="3" fill="#24150f" />
+                  </g>
+                  <g id="p-eyeP" opacity="0">
+                    <rect x="46" y="27" width="18" height="27" rx="8" fill="#24150f" />
+                    <circle cx="52" cy="34" r="3.6" fill="#ffffff" />
+                    <circle cx="58.5" cy="46" r="1.8" fill="#ffffff" />
+                    <rect x="96" y="27" width="18" height="27" rx="8" fill="#24150f" />
+                    <circle cx="102" cy="34" r="3.6" fill="#ffffff" />
+                    <circle cx="108.5" cy="46" r="1.8" fill="#ffffff" />
+                  </g>
+                </g>
+                <path id="p-mouth" d="M73 63 Q80 58.5 87 63" fill="none" stroke="#24150f" stroke-width="3.2" stroke-linecap="round" opacity="0" />
+                <path id="p-tear" d="M44 54 C41 59 41 62 44 63 C47 62 47 59 44 54Z" fill="#8fd3ff" opacity="0" />
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div id="p-heartClip" class="clip" data-start="0" data-duration="7.4" data-layout-allow-overflow data-layout-ignore>
+    <svg id="p-heart" viewBox="0 0 100 90">
+      <g id="p-heartInner">
+        <path id="p-heartPath" d="M50 88 C20 66 2 48 2 28 C2 13 13 2 27 2 C37 2 45 8 50 17 C55 8 63 2 73 2 C87 2 98 13 98 28 C98 48 80 66 50 88Z" fill="#ff4f86" />
+        <ellipse id="p-heartShine" cx="27" cy="22" rx="10" ry="6" transform="rotate(-30 27 22)" fill="#ffffff" opacity="0.55" />
+      </g>
+    </svg>
+    </div>
+  </div>
+
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const FEET = "80 98"; // svg origin at the feet, for squash and lean
+
+    // ---------- initial states ----------
+    gsap.set("#p-rig", { x: -560 });
+    gsap.set("#p-hop", { y: 282 }); // eyes peek over the bottom edge at frame 0
+    gsap.set("#p-shadow", { scale: 0, opacity: 0 });
+    gsap.set(".p-puff", { scale: 0, opacity: 0 });
+    gsap.set("#p-posterRig", { y: 400, scaleY: 0.3, opacity: 0, transformOrigin: "960px 345px" });
+    gsap.set("#p-rollL", { x: 562 });
+    gsap.set("#p-rollR", { x: -562 });
+    gsap.set("#p-paper", { clipPath: "inset(0px 562px 0px 562px)" });
+    gsap.set(".p-word", { opacity: 0, filter: "blur(8px)", y: 20 });
+    gsap.set(".p-letter", { opacity: 0, scale: 0.4, y: 40, transformOrigin: "50% 80%" });
+    gsap.set("#p-heart", { scale: 0, opacity: 0, transformOrigin: "50% 50%" });
+    gsap.set("#p-armL", { svgOrigin: "25 43.5", rotation: 0 });
+    gsap.set("#p-armR", { svgOrigin: "135 43.5", rotation: 0 });
+    gsap.set("#p-squash", { svgOrigin: FEET });
+    gsap.set(["#p-eyeL", "#p-eyeR"], { transformOrigin: "50% 50%" });
+
+    // ---------- 1. pops up from the bottom ----------
+    tl.to("#p-hop", { y: 300, duration: 0.14, ease: "power2.out" }, 0.1); // little dip before the jump
+    tl.to("#p-hop", { y: -70, duration: 0.42, ease: "power2.out" }, 0.25);
+    tl.fromTo("#p-squash", { scaleY: 1, scaleX: 1 }, { scaleY: 1.16, scaleX: 0.9, duration: 0.18, ease: "power2.out" }, 0.25);
+    tl.to("#p-squash", { scaleY: 1, scaleX: 1, duration: 0.2, ease: "sine.inOut" }, 0.45);
+    tl.to("#p-hop", { y: 0, duration: 0.2, ease: "power2.in" }, 0.67);
+    tl.to("#p-shadow", { scale: 1, opacity: 1, duration: 0.42, ease: "power2.in" }, 0.45);
+    // landing squash, then a springy settle
+    tl.to("#p-squash", { scaleY: 0.76, scaleX: 1.2, duration: 0.07, ease: "power2.out" }, 0.87);
+    tl.to("#p-squash", { scaleY: 1, scaleX: 1, duration: 0.6, ease: "elastic.out(1, 0.42)" }, 0.94);
+    // dust puffs
+    tl.to(".p-puff", { scale: 1, opacity: 1, duration: 0.12, ease: "power2.out" }, 0.87);
+    tl.to("#p-puff1", { x: -40, y: -10, duration: 0.45, ease: "power2.out" }, 0.87);
+    tl.to("#p-puff2", { x: -50, y: -24, duration: 0.45, ease: "power2.out" }, 0.87);
+    tl.to("#p-puff3", { x: 40, y: -10, duration: 0.45, ease: "power2.out" }, 0.87);
+    tl.to("#p-puff4", { x: 50, y: -24, duration: 0.45, ease: "power2.out" }, 0.87);
+    tl.to(".p-puff", { scale: 0.3, opacity: 0, duration: 0.3, ease: "power2.in" }, 1.05);
+    // looks toward the centre and blinks
+    tl.to("#p-eyes", { x: 6, duration: 0.16, ease: "power2.out" }, 1.08);
+    tl.to(["#p-eyeL", "#p-eyeR"], { scaleY: 0.1, duration: 0.06, ease: "power2.in", yoyo: true, repeat: 1 }, 1.2);
+
+    // ---------- 2. walks into centre frame ----------
+    const W0 = 1.38, STEP = 0.3, STEPS = 6;
+    tl.to("#p-rig", { x: 0, duration: STEP * STEPS, ease: "sine.inOut" }, W0);
+    tl.to("#p-squash", { rotation: 5, duration: 0.25, ease: "power2.out" }, W0);
+    const legsA = ["#p-leg1", "#p-leg3"], legsB = ["#p-leg2", "#p-leg4"];
+    for (let i = 0; i < STEPS; i++) {
+      const t = W0 + i * STEP;
+      const lift = i % 2 === 0 ? legsA : legsB;
+      tl.to(lift, { y: -11, duration: STEP / 2, ease: "sine.out" }, t);
+      tl.to(lift, { y: 0, duration: STEP / 2, ease: "sine.in" }, t + STEP / 2);
+      tl.to("#p-body", { y: -5, duration: STEP / 2, ease: "sine.out" }, t);
+      tl.to("#p-body", { y: 0, duration: STEP / 2, ease: "sine.in" }, t + STEP / 2);
+      tl.to("#p-armL", { rotation: i % 2 === 0 ? 16 : -12, duration: STEP, ease: "sine.inOut" }, t);
+      tl.to("#p-armR", { rotation: i % 2 === 0 ? 12 : -16, duration: STEP, ease: "sine.inOut" }, t);
+    }
+    const STOP = W0 + STEP * STEPS; // 3.18
+    tl.to(["#p-armL", "#p-armR"], { rotation: 0, duration: 0.2, ease: "power2.out" }, STOP);
+    // follow-through: leans back past upright, then settles
+    tl.to("#p-squash", { rotation: -4, duration: 0.16, ease: "power2.out" }, STOP);
+    tl.to("#p-squash", { rotation: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, STOP + 0.16);
+    // faces the camera, blinks
+    tl.to("#p-eyes", { x: 0, duration: 0.16, ease: "power2.out" }, STOP + 0.22);
+    tl.to(["#p-eyeL", "#p-eyeR"], { scaleY: 0.1, duration: 0.06, ease: "power2.in", yoyo: true, repeat: 1 }, STOP + 0.38);
+
+    // ---------- 3. pulls out a gigantic poster ----------
+    const PULL = 3.8;
+    // anticipation: crouch, arm reaches behind
+    tl.to("#p-squash", { scaleY: 0.87, scaleX: 1.08, duration: 0.18, ease: "power2.out" }, PULL);
+    tl.to("#p-armR", { rotation: 75, duration: 0.18, ease: "power2.out" }, PULL);
+    tl.to("#p-armL", { rotation: 25, duration: 0.2, ease: "power2.out" }, PULL + 0.03);
+    tl.to("#p-eyes", { x: 4, y: -2, duration: 0.12, ease: "power2.out" }, PULL);
+    // the yank: stretch up, both arms shoot up to hold it
+    tl.to("#p-squash", { scaleY: 1.1, scaleX: 0.94, duration: 0.14, ease: "power2.out" }, PULL + 0.2);
+    tl.to("#p-squash", { scaleY: 1, scaleX: 1, duration: 0.55, ease: "elastic.out(1, 0.5)" }, PULL + 0.34);
+    tl.to("#p-armR", { rotation: -80, scaleX: 2.75, duration: 0.32, ease: "back.out(1.6)" }, PULL + 0.22);
+    tl.to("#p-armL", { rotation: 80, scaleX: 2.75, duration: 0.34, ease: "back.out(1.6)" }, PULL + 0.25);
+    tl.to("#p-eyes", { x: 0, y: -3, duration: 0.2, ease: "power2.out" }, PULL + 0.25);
+    tl.to("#p-posterRig", { opacity: 1, duration: 0.05 }, PULL + 0.2);
+    tl.to("#p-posterRig", { y: 0, scaleY: 1, duration: 0.48, ease: "back.out(1.3)" }, PULL + 0.2);
+
+    // unrolls sideways
+    const UNROLL = PULL + 0.66; // 4.46
+    tl.to("#p-rollL", { x: 0, duration: 0.62, ease: "power3.inOut" }, UNROLL);
+    tl.to("#p-rollR", { x: 0, duration: 0.62, ease: "power3.inOut" }, UNROLL);
+    tl.to("#p-paper", { clipPath: "inset(0px 0px 0px 0px)", duration: 0.62, ease: "power3.inOut" }, UNROLL);
+
+    // ---------- 4. the words land ----------
+    const TXT = UNROLL + 0.5; // 4.96
+    tl.to("#p-w1", { opacity: 1, filter: "blur(0px)", y: 0, duration: 0.22, ease: "power3.out" }, TXT);
+    tl.to("#p-w2", { opacity: 1, filter: "blur(0px)", y: 0, duration: 0.22, ease: "power3.out" }, TXT + 0.1);
+    ["#p-l1", "#p-l2", "#p-l3", "#p-l4"].forEach((sel, i) => {
+      tl.to(sel, { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(2.2)" }, TXT + 0.34 + i * 0.08);
+    });
+    const HEART = TXT + 0.72; // 5.68
+    tl.fromTo("#p-heart", { scale: 0, opacity: 0, rotation: -25 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: "elastic.out(1, 0.45)" }, HEART);
+
+    // the mascot's apology face: a little take, puppy eyes, blush, a tear
+    tl.to("#p-squash", { scaleY: 0.95, scaleX: 1.03, duration: 0.08, ease: "power2.out" }, TXT + 0.05);
+    tl.to("#p-squash", { scaleY: 1, scaleX: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" }, TXT + 0.13);
+    tl.to("#p-eyeN", { opacity: 0, duration: 0.06 }, TXT + 0.1);
+    tl.to("#p-eyeP", { opacity: 1, duration: 0.06 }, TXT + 0.1);
+    tl.to("#p-eyes", { y: 0, duration: 0.2, ease: "power2.out" }, TXT + 0.1);
+    tl.to("#p-mouth", { opacity: 1, duration: 0.1 }, TXT + 0.14);
+    tl.to("#p-blush", { opacity: 1, duration: 0.4, ease: "power1.out" }, TXT + 0.25);
+    tl.fromTo("#p-tear", { opacity: 0, y: 0 }, { opacity: 1, duration: 0.15 }, 5.95);
+    tl.to("#p-tear", { y: 16, duration: 0.6, ease: "power1.in" }, 6.0);
+    tl.to("#p-tear", { opacity: 0, duration: 0.15 }, 6.5);
+    // a shy little head tilt while it waits
+    tl.to("#p-squash", { rotation: -2.5, duration: 0.5, ease: "sine.inOut" }, 5.6);
+    tl.to("#p-squash", { rotation: 1.5, duration: 0.5, ease: "sine.inOut" }, 6.1);
+
+    // heart beats twice
+    [6.05, 6.38].forEach((t) => {
+      tl.to("#p-heartInner", { scale: 1.16, svgOrigin: "50 45", duration: 0.1, ease: "power2.out" }, t);
+      tl.to("#p-heartInner", { scale: 1, svgOrigin: "50 45", duration: 0.2, ease: "power2.in" }, t + 0.1);
+    });
+
+    // ---------- 5. the heart becomes the world ----------
+    const ZOOM = 6.72;
+    tl.to("#p-heartShine", { opacity: 0, duration: 0.12 }, ZOOM);
+    tl.to("#p-heart", { x: -290, y: 103, scale: 70, duration: 0.56, ease: "power3.in" }, ZOOM);
+    tl.to("#p-heartPath", { attr: { fill: "#ffc4d6" }, duration: 0.5, ease: "power1.in" }, ZOOM + 0.05);
+    tl.to("#p-world", { filter: "blur(14px)", duration: 0.4, ease: "power2.in" }, ZOOM + 0.08);
+
+    window.__timelines["poster"] = tl;
+  </script>
+</template>
