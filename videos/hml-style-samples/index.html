@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HML style samples</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<style>html,body{margin:0;background:#fff;overflow:hidden}#stage,canvas{position:absolute;left:0;top:0}</style>
+</head><body><div id="stage"></div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const view = q.get('view') || 'words';
+await document.fonts.load('900 60px Nunito', 'Үгийг цээжлэх Ө ABC');
+await document.fonts.load('800 60px Nunito', 'Үгийг ABC');
+await document.fonts.load('400 60px "DM Serif Display"', 'because');
+const mod = await import(`./src/${view}.js`);
+window.DUR = 1;
+if (mod.init) await mod.init(q);
+window.render = (t) => mod.frame(t, q, document.getElementById('stage'));
+window.render(0);
+window.READY = true;
+</script></body></html>
