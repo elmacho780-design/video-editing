@@ -47,6 +47,14 @@ export function girl(pose = {}) {
     root.add(feltBlob(C.cream, [0.0, y, 0.185 + i * 0.012], [0.042, 0.016, 0.018], [0, 0, 0.12], F({ len: 0.004, layers: 3 })));
     root.add(feltTube('#c8a77a', [[-0.045, y + 0.005, 0.18 + i * 0.012], [0.045, y - 0.005, 0.18 + i * 0.012]], 0.004, F({ len: 0.002, layers: 2 })));
   });
+  if (P.medal) {   // a gold medal on a maroon ribbon
+    [-1, 1].forEach((sd) => root.add(feltTube('#7a1f2b', [[sd * 0.1, 1.16, 0.08], [sd * 0.06, 1.04, 0.18], [-0.02 + sd * 0.012, 0.93, 0.205]], 0.016, F({ len: 0.004, layers: 3 }))));
+    const gold = gloss('#e0ad45', { metalness: 0.75, roughness: 0.3 });
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.018, 40), gold);
+    disc.rotation.x = Math.PI / 2 - 0.2; disc.position.set(-0.02, 0.86, 0.215); disc.castShadow = true; root.add(disc);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.058, 0.007, 8, 40), gold);
+    rim.rotation.x = -0.2; rim.position.set(-0.02, 0.862, 0.226); root.add(rim);
+  }
   root.add(feltBlob(C.crest, [-0.11, 0.98, 0.16], [0.034, 0.04, 0.012], [0.1, -0.5, 0], F({ len: 0.004, layers: 4 })));
   // scarf: a fat knit ring round the neck, one end hanging over the coat
   const scarfRing = feltMesh(new THREE.TorusGeometry(0.13, 0.065, 24, 64), C.knit, F({ len: 0.011 }));
