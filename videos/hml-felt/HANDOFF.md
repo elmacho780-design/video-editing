@@ -47,6 +47,13 @@ node core/render/still.mjs <repo>/videos/hml-felt 0 --size 1080x1920 --q 'view=t
 
 Rebuild the music and the animatic (from the project folder): `$LIB/.venv/bin/python audio/score.py` then `sh audio/animatic.sh`.
 
+### Batu's machine: Windows, RTX 5060, Core i5 13th gen
+
+- The library is built for macOS and Linux and recommends **WSL2 (Ubuntu)** on Windows: its set-up and fetch scripts are POSIX `sh`, and the venv paths assume `.venv/bin`. Keep the NVIDIA Windows driver up to date: it also drives the GPU inside WSL.
+- **First check the GPU is in use.** Render one still and read the output: the line `[note] WebGL runs on software rendering` means Chromium fell back to the CPU (this cloud machine took about 35 s per full-quality frame that way).
+- If that note appears, choose the ANGLE backend with `LEMO_ANGLE`: in WSL try `LEMO_ANGLE=vulkan`, then `LEMO_ANGLE=gl`. Natively on Windows (Git Bash) try `LEMO_ANGLE=d3d11`. Re-render until the note is gone, and time a frame.
+- If WSL cannot reach the GPU in headless Chromium, render natively on Windows with `LEMO_ANGLE=d3d11` and keep WSL for the Python music scripts.
+
 ## House rules
 
 British English, no em dashes. Mongolian subtitles placed high, clear of the Reels UI. Commit only to the branch above. Never commit third-party reference art.
