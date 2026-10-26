@@ -7,3 +7,4 @@ frames/
 out/
 audio/*.wav
 audio/whisper.json
+src/*.mp4

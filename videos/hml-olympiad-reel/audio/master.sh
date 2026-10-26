@@ -1,11 +1,10 @@
 #!/bin/sh
-# Mux the rendered picture with the mix, two-pass loudnorm to -14 LUFS / -1.2 dBTP (Instagram). Run from the project folder.
+# Final file: the basketball hook (121 frames) cut straight into the rendered edit, muxed with audio/out/final.wav
+# (already mastered to -14 LUFS by audio/final.py, so the audio is only encoded here, never re-levelled). Run from the project folder.
 set -e
-V=out/video.mp4; A=audio/out/mix.wav; O=out/hml-olympiad-reel.mp4
-J=$(ffmpeg -nostdin -hide_banner -i "$A" -af loudnorm=I=-14:TP=-1.2:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
-get() { echo "$J" | python3 -c "import json,sys;print(json.load(sys.stdin)['$1'])"; }
-ffmpeg -nostdin -hide_banner -loglevel error -y -i "$V" -i "$A" -map 0:v -map 1:a -c:v copy \
-  -af "loudnorm=I=-14:TP=-1.2:LRA=11:measured_I=$(get input_i):measured_TP=$(get input_tp):measured_LRA=$(get input_lra):measured_thresh=$(get input_thresh):offset=$(get target_offset):linear=true,aresample=48000" \
-  -c:a aac -b:a 256k -movflags +faststart -shortest "$O"
+V=out/video.mp4; A=audio/out/final.wav; O=out/hml-olympiad-reel.mp4
+ffmpeg -nostdin -hide_banner -loglevel error -y -i src/hook.mp4 -i "$V" -i "$A" -filter_complex \
+  "[0:v]fps=30,scale=1080:1920,setsar=1,trim=end_frame=121,setpts=PTS-STARTPTS,format=yuv420p[h];[1:v]fps=30,setsar=1,format=yuv420p[e];[h][e]concat=n=2:v=1:a=0[v]" \
+  -map "[v]" -map 2:a -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -c:a aac -b:a 320k -ar 48000 -movflags +faststart -shortest "$O"
 ffmpeg -nostdin -hide_banner -i "$O" -map 0:a -af ebur128=peak=true -f null - 2>&1 | grep -E "^ +(I|LRA|Peak):" | tail -3
 echo "$O"

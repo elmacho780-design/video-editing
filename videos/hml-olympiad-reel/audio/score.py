@@ -110,7 +110,7 @@ duck = np.convolve(duck, np.ones(int(0.25 * SR)) / int(0.25 * SR), 'same')      
 rms = lambda x: np.sqrt((x ** 2).mean()) + 1e-12
 speech = venv > np.percentile(venv, 55)
 v_rms = rms(voice[speech, 0])
-m_gain = v_rms / rms(music[:int(STOP * SR), 0]) * 10 ** (-10 / 20)     # music sits about 10 dB under speech, then ducks 5 dB more
+m_gain = v_rms / rms(music[:int(STOP * SR), 0]) * 10 ** (-12 / 20)     # music sits about 12 dB under speech, then ducks 5 dB more
 music *= m_gain
 mix = voice + music * duck[:, None] + fx
 L = int(DUR * SR); mix = mix[:L]; fo = int(0.12 * SR); mix[-fo:] *= np.linspace(1, 0.3, fo)[:, None]
