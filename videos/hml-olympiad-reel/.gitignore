@@ -1,5 +1,9 @@
-# raw footage, working audio and footage stills stay local
-src/
-audio/
+src/*.mov
+audio/out/*
+!audio/out/.keep
 sheets/
 stills/src/
+frames/
+out/
+audio/*.wav
+audio/whisper.json

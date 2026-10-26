@@ -1,0 +1,67 @@
+/* HML olympiad Reel: the "HML notebook" look. Paper, stickers, stamps and hard shadows; navy, cream, HML orange, sky blue. */
+:root {
+  --navy: #14295a; --ink: #0d1c40; --paper: #f8f2e4; --paper-2: #efe6d2;
+  --orange: #ff6a2b; --orange-2: #ff8c3a; --amber: #ffb02e; --sky: #4ea3ff; --sky-soft: rgba(78, 163, 255, 0.28);
+  --hard: 9px 10px 0 var(--orange);
+  --hard-navy: 10px 12px 0 var(--navy);
+  --lift: 0 18px 34px rgba(8, 16, 40, 0.28);
+}
+html, body { margin: 0; background: #000; overflow: hidden; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Manrope, sans-serif; color: var(--navy); }
+.abs { position: absolute; }
+.layer { position: absolute; inset: 0; }
+.uni { font-family: Unbounded, sans-serif; }
+.label { font: 800 30px Manrope, sans-serif; }
+
+/* footage */
+.footage { position: absolute; inset: 0; background-size: cover; background-position: center; transform-origin: 50% 42%;
+  filter: contrast(1.07) saturate(1.06) brightness(1.02); }
+.grade { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 70% at 50% 40%, rgba(255, 220, 180, 0.05), rgba(10, 20, 50, 0.2) 100%); }
+
+/* sticker caption: navy label, thick white border, hard orange shadow, alternating tilt */
+.cap { position: absolute; left: 50%; white-space: nowrap; background: var(--navy); color: #fff; border: 6px solid #fff; border-radius: 20px;
+  padding: 14px 30px 18px; font: 800 52px/1.1 Manrope, sans-serif; letter-spacing: -0.5px; box-shadow: var(--hard), var(--lift); }
+.cap .kw { position: relative; color: #ff9a5c; }
+.cap .kw::after { content: ''; position: absolute; left: -4px; right: -4px; bottom: -14px; height: 18px;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 18' preserveAspectRatio='none'><path d='M2 11 Q12 3 22 10 T42 10 T62 10 T82 10 T102 10 T118 8' fill='none' stroke='%23ff6a2b' stroke-width='5' stroke-linecap='round'/></svg>") 0 0/100% 100% no-repeat; }
+.cap-small { font-size: 36px; padding: 10px 22px 13px; border-width: 5px; box-shadow: 6px 7px 0 var(--orange), var(--lift); }
+
+/* ticket: the big line of a two-tier caption */
+.ticket { position: absolute; left: 50%; white-space: nowrap; background: var(--paper); color: var(--navy); padding: 18px 54px 24px;
+  font: 900 80px/1.05 Unbounded, sans-serif; letter-spacing: -2px; box-shadow: var(--hard), var(--lift);
+  -webkit-mask: radial-gradient(circle 18px at 0 50%, transparent 98%, #000) left/51% 100% no-repeat, radial-gradient(circle 18px at 100% 50%, transparent 98%, #000) right/51% 100% no-repeat;
+  mask: radial-gradient(circle 18px at 0 50%, transparent 98%, #000) left/51% 100% no-repeat, radial-gradient(circle 18px at 100% 50%, transparent 98%, #000) right/51% 100% no-repeat; }
+.ticket-wrap { position: absolute; left: 50%; filter: drop-shadow(9px 10px 0 var(--orange)) drop-shadow(0 16px 26px rgba(8, 16, 40, .3)); }
+.ticket-wrap .ticket { position: relative; left: 0; box-shadow: none; }
+
+/* notebook paper card */
+.paper { position: absolute; background: var(--paper); border: 5px solid var(--navy); border-radius: 22px; box-shadow: var(--hard-navy), var(--lift);
+  background-image: repeating-linear-gradient(180deg, transparent 0 46px, var(--sky-soft) 46px 48px); background-position: 0 30px; }
+.paper .margin { position: absolute; left: 70px; top: 0; bottom: 0; width: 3px; background: rgba(255, 106, 43, .55); }
+.tape { position: absolute; width: 170px; height: 46px; background: rgba(78, 163, 255, .55); box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+  clip-path: polygon(0 8%, 4% 0, 8% 10%, 12% 0, 16% 8%, 20% 0, 80% 0, 84% 9%, 88% 0, 92% 8%, 96% 0, 100% 10%, 100% 92%, 96% 100%, 92% 90%, 88% 100%, 84% 91%, 80% 100%, 20% 100%, 16% 92%, 12% 100%, 8% 90%, 4% 100%, 0 92%); }
+.tape.orange { background: rgba(255, 140, 58, .6); }
+
+/* stickers and chips */
+.stk { position: absolute; background: var(--navy); color: #fff; border: 5px solid #fff; border-radius: 18px; box-shadow: 6px 7px 0 var(--orange), var(--lift); font: 800 32px Manrope; padding: 10px 22px; white-space: nowrap; }
+.stk.or { background: var(--orange); box-shadow: 6px 7px 0 var(--navy), var(--lift); }
+.stk.sky { background: var(--sky); box-shadow: 6px 7px 0 var(--navy), var(--lift); }
+
+/* bookmark ribbon brand tag, hanging from the top edge */
+.bookmark { position: absolute; left: 70px; top: 0; width: 120px; height: 236px; background: var(--navy);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 54px; box-sizing: border-box;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .3)); }
+.bookmark .coin { width: 84px; height: 84px; border-radius: 50%; background: #fff url(../assets/hml-tree.png) center/76% no-repeat; border: 4px solid var(--orange); box-sizing: border-box; }
+.bookmark .t { color: #fff; font: 900 19px Unbounded; margin-top: 8px; letter-spacing: 1px; }
+
+/* split-flap digits */
+.flap { position: relative; display: inline-block; width: 66px; height: 100px; margin-right: 6px; border-radius: 10px; background: var(--navy);
+  color: #fff; font: 800 70px/100px Unbounded; text-align: center; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .3); overflow: hidden; }
+.flap::after { content: ''; position: absolute; left: 0; right: 0; top: 49px; height: 3px; background: rgba(0, 0, 0, .55); }
+.flap.gap { width: 26px; background: none; box-shadow: none; }
+.flap.gap::after { display: none; }
+
+/* comic shout */
+.comic { position: absolute; font: 900 92px/1.02 Unbounded, sans-serif; color: #fff; text-align: center; letter-spacing: -2px;
+  -webkit-text-stroke: 16px var(--ink); paint-order: stroke fill; text-shadow: 10px 12px 0 var(--orange); }
