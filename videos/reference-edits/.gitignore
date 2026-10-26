@@ -1,0 +1,6 @@
+# third-party Reels and everything derived from them stay local
+src/
+sheets/
+strips/
+frames/
+audio/
