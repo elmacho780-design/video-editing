@@ -4,7 +4,7 @@ import * as U from './ui.js';
 const { clamp, backOut, easeOut } = U;
 
 // ---------------------------------------------------------------- cuts: keep these source ranges, pauses between them removed
-const KEEP = [[0.95, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]];
+const KEEP = [[0.0, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]];
 const HOLD = 1.0, LAST = 1379;
 let acc = 0;
 const SEG = KEEP.map(([a, b], i) => { const s = { a, b, o: acc, i }; acc += b - a; return s; });
@@ -56,7 +56,9 @@ let sNow = 0;
 function footXf(src, seg, t) {
   const segDur = seg.b - seg.a;
   let s = [1.04, 1.1, 1.0, 1.09, 1.0][seg.i] + 0.035 * clamp((t - seg.o) / segDur), ox = 540, oy = 700, tx = 0, ty = 0, r = 0;
-  if (seg.i === 0) s += 0.30 * (1 - smooth((src - 0.95) / 1.15));          // she walks up to the lens: counter-zoom keeps her size steady
+  // the opening: the Essential English banner covers the lens and slides away; push in onto her as it clears,
+  // then counter-zoom while she walks up to the lens so her size stays steady
+  if (seg.i === 0) s += src < 0.45 ? 0 : src < 0.8 ? 0.30 * smooth((src - 0.45) / 0.35) : 0.30 * (1 - smooth((src - 0.8) / 1.3));
   const bump = (at, amt, len = 1.2) => { if (src >= at && src < at + len) s += amt * easeOut((src - at) / 0.1); };
   bump(3.94, 0.05, 1.2); bump(8.78, 0.06, 0.49); bump(27.74, 0.08, 0.84); bump(36.75, 0.05, 0.9);
   if (src >= SHOUT0 && src < SHOUT1) {                                       // the shout: crash zoom on her face, a short shake
@@ -122,7 +124,7 @@ function sceneAt(src, frame) {
 // ---------------------------------------------------------------- sound and music cues (output seconds), exported for the mix
 export const EV = (() => {
   const ev = [], add = (src, type, extra = {}) => ev.push({ t: +O(src).toFixed(3), type, ...extra });
-  [W1, W2, W3].forEach((w) => add(w - 0.05, 'whoosh'));
+  add(0.12, 'whoosh'); [W1, W2, W3].forEach((w) => add(w - 0.05, 'whoosh'));
   CARDS.forEach(([a, , , , anim]) => { if (anim !== 'none') add(a, 'slap'); });
   TILES.forEach(([a, b], i) => { add(a, 'tile', { n: i }); add(b, 'tick'); });
   for (let k = 0; k < 16; k++) add(FLAP0 + (k / 16) * FLAP_DUR, 'flap');
@@ -165,7 +167,7 @@ export async function frame(t) {
   under.innerHTML = underHtml;
 
   let g = top;
-  const brandOn = (t < O(13.95)) || (t >= O(22.95) && t < O(30.94)) || (t >= O(36.75) && t < O(37.75));
+  const brandOn = (t >= O(0.6) && t < O(13.95)) || (t >= O(22.95) && t < O(30.94)) || (t >= O(36.75) && t < O(37.75));
   if (brandOn) g += U.brand();
   for (const [a, b, origin, html, anim] of CARDS) {
     const t0 = O(a), t1 = O(b);

@@ -8,7 +8,7 @@ from scipy.signal import butter, sosfilt
 from core.audio.sfx import SR
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
-KEEP = [[0.95, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]]
+KEEP = [[0.0, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]]
 SHOUT = (35.28, 36.74)
 DUR = json.load(open(os.path.join(ROOT, 'edit', 'events.json')))['dur']
 
