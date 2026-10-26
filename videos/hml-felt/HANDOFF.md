@@ -22,10 +22,11 @@ Branch: `claude/openstoryline-install-use-mj0u13`.
 - **Animatic:** `renders/animatic.mp4` (still frames cut to the music).
 - **Shot 4 motion (test clip):** `src/shot4.js` (`?view=shot4`), rendered as `renders/shot4_test.mp4` (7.0 to 10.5 s, music muxed in). The needle stabs each eyelet on its stitch note, each tag floods with colour from its eyelet, warm light and her delight arrive at 8.0, the camera drifts down the garland onto the shot 4 key frame. Use it as the motion reference for the other shots.
 
+- **The film (approved by Batu):** `src/film.js` (`?view=film`, `window.DUR = 24`, deterministic `render(t)`), rendered with the music as `renders/film.mp4` (-14 LUFS). Every move lands on its cue in `audio/score.py`: the drawer rattles on the music box, the card lands on the bell at 3.0, the three words are pinned on their plucks, the stitches, the burst at 10.0, the whip pan at 12.0, the catch at 14.0, the medal on the crash at 18.0, the flowers on the music box's notes. The girl moves stop-motion style (pose variants swapped on twos); fast moves get sub-frame motion blur.
+
 ## Next
 
-1. Animate all eight shots as one film, `view=film`, exposing `window.DUR = 24` and a deterministic `window.render(t)` (fold `shot4.js` in as 7 to 10 s).
-2. When his voiceover arrives: mix it over `music.wav` (duck the music under the voice), then mux and master to -14 LUFS.
+1. When his voiceover arrives: mix it over `music.wav` (duck the music under the voice), then mux and master to -14 LUFS.
 
 ## Code map
 
@@ -34,7 +35,9 @@ Branch: `claude/openstoryline-install-use-mj0u13`.
 - `src/set.js`: the shared set (cabinet incl. the grey archive wall, word tags, bus, gers, hills, skyline, clock, `dawnWorld`, `finish`).
 - `src/board.js`: the eight storyboard shots (`?view=board&s=N`). Reuse these scenes as the animation's start and end poses.
 - `src/turn.js`: the hero frame (shot 6). `src/cast.js`: cast sheet. `src/storyboard.js`: the sheet.
-- The still views render once inside `init()` and swap in an image, to dodge the 30 s screenshot timeout on a CPU-only machine. An animated view must draw per frame in `render(t)` instead.
+- `src/film.js`: the film. It builds one scene at a time from the storyboard scenes (`SHOTS` in `board.js` and `world()` in `turn.js` return `h`, handles on their moving parts; `shot4.js` exports `build(S)`), so the key frames stay the start and end poses. Shots 1 and 2 share one set.
+- The still views render once inside `init()` and swap in an image, to dodge the 30 s screenshot timeout on a CPU-only machine. The animated views (`shot4`, `film`) draw per frame in `render(t)` instead.
+- Render the film from `$LIB`: `node core/render/video.mjs <repo>/videos/hml-felt --workers 4 --size 1080x1920 --q 'view=film&ssaa=1.5&fq=1' --out <tmp>/film_silent.mp4`, then `sh core/render/mux.sh <tmp>/film_silent.mp4 <repo>/videos/hml-felt/audio/out/music.wav <repo>/videos/hml-felt/renders/film.mp4 24 2`. About 22 s on the RTX 5060.
 
 ## Set-up on a new machine
 

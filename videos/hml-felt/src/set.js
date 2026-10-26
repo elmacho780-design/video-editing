@@ -267,6 +267,7 @@ export function subtitle(stage, w, sub) {
     font: '900 58px Nunito, sans-serif', color: '#fff8ec', textShadow: '0 4px 18px rgba(10,20,45,.6), 0 2px 0 rgba(10,20,45,.4)',
   });
   stage.appendChild(el);
+  return el;
 }
 
 // ---------------------------------------------------------------- render once while loading (no screenshot timeout), then show the picture and the subtitle

@@ -31,7 +31,7 @@ const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const smooth = (a, b, x) => { const k = clamp01((x - a) / (b - a)); return k * k * (3 - 2 * k); };
 const easeOut = (x) => 1 - (1 - clamp01(x)) ** 3;
 
-let S, tags, yarn, yarnEnd, needle, curve, keys, girls, warmLight, hemi;
+let S, update;
 
 // a word tag that starts grey and floods with its colour from the eyelet: both faces in one shader, mixed by uP
 function stitchTag(word, [col, ink], grey, pos, rz, sc) {
@@ -62,7 +62,7 @@ function stitchTag(word, [col, ink], grey, pos, rz, sc) {
   return { pivot, eye, rz, sc, set: (p) => { u.uP.value = p; edge.color.copy(edgeGrey).lerp(edgeCol, p); } };
 }
 
-function feltNeedle() {
+export function feltNeedle() {
   const nd = new THREE.Group();   // local origin at the tip, shaft along +y
   const steel = gloss('#d4d7dc', { metalness: 0.95, roughness: 0.2 });
   const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 14), steel); sh.position.y = 0.43; sh.castShadow = true; nd.add(sh);
@@ -78,12 +78,24 @@ export async function init(q) {
   stage.style.width = FW + 'px'; stage.style.height = FH + 'px';
   globalThis.FELT_Q = +(q.get('fq') || 0.8);
   S = setup(stage, { w: FW, h: FH, fov: 30, ssaa: +(q.get('ssaa') || 1.5), exposure: 0.95 });
+  update = build(S);
+  subtitle(stage, FW, SUBS[4]);
+}
+
+export function frame(t) {
+  update(t);
+  S.post.composer.render();
+}
+
+// the shot's set on S.scene; returns update(t) for clip time t (the film calls it with t = film time - 7)
+export function build(S) {
   const { scene } = S;
+  let warmLight, hemi;
   archive(scene, { warm: 1 });
   scene.traverse((o) => { if (o.isDirectionalLight && o.color.getHexString() === 'ffbf80') warmLight = o; if (o.isHemisphereLight) hemi = o; });
   bigWall(scene);
 
-  tags = SEQ.map(([w, col, p, rz, sc], i) => { const tg = stitchTag(w, col, GREYS[i % 3], p, rz, sc); scene.add(tg.pivot); return tg; });
+  const tags = SEQ.map(([w, col, p, rz, sc], i) => { const tg = stitchTag(w, col, GREYS[i % 3], p, rz, sc); scene.add(tg.pivot); return tg; });
 
   // the yarn's path, as on the key frame: in from the top left, through every eyelet, swinging left and right between them,
   // then on through "snowing" where the needle pulls it out after the last stitch
@@ -94,12 +106,12 @@ export async function init(q) {
     if (i < eyes.length - 1) pts.push(e.clone().lerp(eyes[i + 1], 0.5).add(v3([i % 2 ? -0.25 : 0.25, -0.08, 0.12])));
   });
   pts.push(eyes[eyes.length - 1].clone().add(v3([0.32, -0.22, 0.3])));
-  curve = new THREE.CatmullRomCurve3(pts);
+  const curve = new THREE.CatmullRomCurve3(pts);
 
   // where along the yarn (arc length, 0..1) each eyelet sits: the needle is there on its stitch note
   const M = 3000, samples = curve.getSpacedPoints(M);
   let from = 0;
-  keys = eyes.map((e, i) => {
+  const keys = eyes.map((e, i) => {
     const target = e.clone().add(v3([0, 0, 0.03]));
     let best = from, bd = Infinity;
     for (let k = from; k <= M; k++) { const d = samples[k].distanceToSquared(target); if (d < bd) { bd = d; best = k; } }
@@ -111,15 +123,15 @@ export async function init(q) {
   // the whole yarn built once; it is revealed behind the needle with a draw range (all felt shells share the geometry)
   const N = 900, RAD = 12;
   const geo = new THREE.TubeGeometry(curve, N, 0.018, RAD, false);
-  yarn = { geo, N, RAD };
+  const yarn = { geo, N, RAD };
   scene.add(feltMesh(geo, '#ee8a2c', { len: 0.012, layers: 8 }));
   scene.add(feltBlob('#ee8a2c', pts[0].toArray(), [0.018, 0.018, 0.018], [0, 0, 0], { len: 0.012, layers: 8, seg: 32 }));
-  yarnEnd = feltBlob('#ee8a2c', [0, 0, 0], [0.018, 0.018, 0.018], [0, 0, 0], { len: 0.012, layers: 8, seg: 32 });
+  const yarnEnd = feltBlob('#ee8a2c', [0, 0, 0], [0.018, 0.018, 0.018], [0, 0, 0], { len: 0.012, layers: 8, seg: 32 });
   scene.add(yarnEnd);
-  needle = feltNeedle(); scene.add(needle);
+  const needle = feltNeedle(); scene.add(needle);
 
   // she watches, worried, until the colour arrives on the D major chord; then she lights up
-  girls = ['worried', 'delighted'].map((mood) => {
+  const girls = ['worried', 'delighted'].map((mood) => {
     const gl = girl({ reach: 0, look: [-0.5, mood === 'worried' ? 1 : 0.9], mood, kick: 0 });
     gl.position.set(0.82, 0, 3.6); gl.rotation.y = -0.5; scene.add(gl);
     return gl;
@@ -128,56 +140,53 @@ export async function init(q) {
   S.post.dof.aper = 2.4; S.post.dof.maxCoc = 10;
   S.post.bloom.strength = 0.08; S.post.bloom.threshold = 0.92;
   S.post.vig.uniforms.amt.value = 0.32;
-  subtitle(stage, FW, SUBS[4]);
-}
 
-// how far along the yarn the needle is at clip time t: still at each eyelet on its note, a smooth swoop between
-function along(t) {
-  if (t <= keys[0][0]) return keys[0][1];
-  for (let i = 0; i < keys.length - 1; i++) {
-    const [ta, ua] = keys[i], [tb, ub] = keys[i + 1];
-    if (t <= tb) { const s = (t - ta) / (tb - ta); return ua + (ub - ua) * (i === keys.length - 2 ? easeOut(s) : smooth(0, 1, s)); }
-  }
-  return 1;
+  // how far along the yarn the needle is at clip time t: still at each eyelet on its note, a smooth swoop between
+  const along = (t) => {
+    if (t <= keys[0][0]) return keys[0][1];
+    for (let i = 0; i < keys.length - 1; i++) {
+      const [ta, ua] = keys[i], [tb, ub] = keys[i + 1];
+      if (t <= tb) { const s = (t - ta) / (tb - ta); return ua + (ub - ua) * (i === keys.length - 2 ? easeOut(s) : smooth(0, 1, s)); }
+    }
+    return 1;
+  };
+
+  return (t) => {
+    const { camera } = S;
+
+    // the yarn behind the needle, and the needle stabbing each eyelet on its note
+    const u = along(t);
+    yarn.geo.setDrawRange(0, Math.floor(u * yarn.N) * yarn.RAD * 6);
+    const p = curve.getPointAt(u);
+    yarnEnd.position.copy(p);
+    const dir = curve.getTangentAt(Math.min(u, 0.999)).add(IN.clone().multiplyScalar(0.7)).normalize();
+    const stab = STITCH.reduce((a, ts) => a + Math.exp(-(((t - ts) / 0.07) ** 2)), 0);
+    needle.quaternion.setFromUnitVectors(UP, dir);
+    needle.position.copy(p).addScaledVector(dir, 0.06 * stab - 0.02);
+
+    // each stitched word floods with colour and gives a little jolt; the others sway, pinned and waiting
+    tags.forEach((tg, i) => {
+      const dt = t - STITCH[i];
+      tg.set(dt < 0 ? 0 : easeOut(dt / 0.45));
+      const jolt = dt < 0 ? 0 : Math.exp(-dt * 6) * Math.sin(dt * 24);
+      tg.pivot.rotation.z = tg.rz + 0.07 * jolt + (dt < 0 ? 0.012 * Math.sin(t * 2.3 + i * 1.7) : 0);
+      tg.pivot.scale.setScalar(tg.sc * (1 + 0.05 * Math.max(0, jolt)));
+    });
+
+    // the warm light comes up with the D major chord
+    const warm = 0.1 + 0.7 * smooth(COLOUR_AT - 0.4, COLOUR_AT + 0.6, t);
+    warmLight.intensity = 2.2 * warm; hemi.intensity = 0.55 + 0.15 * warm;
+    S.post.vig.uniforms.warm.value = 0.15 * smooth(COLOUR_AT - 0.4, COLOUR_AT + 0.6, t);
+    girls[0].visible = t < COLOUR_AT; girls[1].visible = t >= COLOUR_AT;
+
+    // the camera drifts down the garland with the needle and settles on the key frame by the last stitch
+    const k = smooth(0, STITCH[STITCH.length - 1], t);
+    camera.position.lerpVectors(v3(CAM_A.pos), v3(CAM_B.pos), k);
+    const look = v3(CAM_A.look).lerp(v3(CAM_B.look), k);
+    camera.lookAt(look);
+    S.post.dof.focus = camera.position.distanceTo(look) - 0.36;
+  };
 }
 
 const UP = new THREE.Vector3(0, -1, 0), IN = new THREE.Vector3(0, 0, -1);
 const CAM_A = { pos: [-0.2, 2.8, 7.7], look: [-0.3, 3.02, 1.2] }, CAM_B = { pos: [0.1, 2.1, 8.9], look: [0.05, 2.42, 1.2] };
-
-export function frame(t) {
-  const { camera } = S;
-
-  // the yarn behind the needle, and the needle stabbing each eyelet on its note
-  const u = along(t);
-  yarn.geo.setDrawRange(0, Math.floor(u * yarn.N) * yarn.RAD * 6);
-  const p = curve.getPointAt(u);
-  yarnEnd.position.copy(p);
-  const dir = curve.getTangentAt(Math.min(u, 0.999)).add(IN.clone().multiplyScalar(0.7)).normalize();
-  const stab = STITCH.reduce((a, ts) => a + Math.exp(-(((t - ts) / 0.07) ** 2)), 0);
-  needle.quaternion.setFromUnitVectors(UP, dir);
-  needle.position.copy(p).addScaledVector(dir, 0.06 * stab - 0.02);
-
-  // each stitched word floods with colour and gives a little jolt; the others sway, pinned and waiting
-  tags.forEach((tg, i) => {
-    const dt = t - STITCH[i];
-    tg.set(dt < 0 ? 0 : easeOut(dt / 0.45));
-    const jolt = dt < 0 ? 0 : Math.exp(-dt * 6) * Math.sin(dt * 24);
-    tg.pivot.rotation.z = tg.rz + 0.07 * jolt + (dt < 0 ? 0.012 * Math.sin(t * 2.3 + i * 1.7) : 0);
-    tg.pivot.scale.setScalar(tg.sc * (1 + 0.05 * Math.max(0, jolt)));
-  });
-
-  // the warm light comes up with the D major chord
-  const warm = 0.1 + 0.7 * smooth(COLOUR_AT - 0.4, COLOUR_AT + 0.6, t);
-  warmLight.intensity = 2.2 * warm; hemi.intensity = 0.55 + 0.15 * warm;
-  S.post.vig.uniforms.warm.value = 0.15 * smooth(COLOUR_AT - 0.4, COLOUR_AT + 0.6, t);
-  girls[0].visible = t < COLOUR_AT; girls[1].visible = t >= COLOUR_AT;
-
-  // the camera drifts down the garland with the needle and settles on the key frame by the last stitch
-  const k = smooth(0, STITCH[STITCH.length - 1], t);
-  camera.position.lerpVectors(v3(CAM_A.pos), v3(CAM_B.pos), k);
-  const look = v3(CAM_A.look).lerp(v3(CAM_B.look), k);
-  camera.lookAt(look);
-  S.post.dof.focus = camera.position.distanceTo(look) - 0.36;
-
-  S.post.composer.render();
-}
