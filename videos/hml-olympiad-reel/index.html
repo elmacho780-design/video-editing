@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HML olympiad Reel</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="src/theme.css">
+</head><body><div id="stage"></div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const view = q.get('view') || 'frames';
+await Promise.all(['900 80px Unbounded', '800 80px Unbounded', '800 40px Manrope', '700 40px Manrope'].map((f) => document.fonts.load(f, 'Олимпиад ABC 123')));
+const mod = await import(`./src/${view}.js`);
+window.DUR = mod.DUR || 1;
+if (mod.init) await mod.init(q);
+window.render = (t) => mod.frame(t, q);
+await window.render(+(q.get('t') || 0));
+window.READY = true;
+</script></body></html>

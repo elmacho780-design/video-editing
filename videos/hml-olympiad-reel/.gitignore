@@ -1,4 +1,5 @@
-# raw footage and working audio stay local (large)
+# raw footage, working audio and footage stills stay local
 src/
 audio/
 sheets/
+stills/src/
