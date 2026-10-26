@@ -258,6 +258,17 @@ export function dawnWorld(scene) {
   return { groundH };
 }
 
+// Mongolian subtitle, placed high and clear of the Reels UI (stills and animated views alike)
+export function subtitle(stage, w, sub) {
+  const el = document.createElement('div');
+  el.textContent = sub;
+  Object.assign(el.style, {
+    position: 'absolute', left: '60px', top: '168px', width: (w - 120) + 'px', textAlign: 'center', zIndex: 5, lineHeight: '1.18',
+    font: '900 58px Nunito, sans-serif', color: '#fff8ec', textShadow: '0 4px 18px rgba(10,20,45,.6), 0 2px 0 rgba(10,20,45,.4)',
+  });
+  stage.appendChild(el);
+}
+
 // ---------------------------------------------------------------- render once while loading (no screenshot timeout), then show the picture and the subtitle
 export async function finish(S, stage, { w, h, sub, safe, extra } = {}) {
   S.post.composer.render();
@@ -266,15 +277,7 @@ export async function finish(S, stage, { w, h, sub, safe, extra } = {}) {
   await img.decode();
   Object.assign(img.style, { position: 'absolute', left: '0', top: '0', width: w + 'px', height: h + 'px' });
   S.canvas.replaceWith(img);
-  if (sub) {   // Mongolian subtitle, placed high and clear of the Reels UI
-    const el = document.createElement('div');
-    el.textContent = sub;
-    Object.assign(el.style, {
-      position: 'absolute', left: '60px', top: '168px', width: (w - 120) + 'px', textAlign: 'center', zIndex: 5, lineHeight: '1.18',
-      font: '900 58px Nunito, sans-serif', color: '#fff8ec', textShadow: '0 4px 18px rgba(10,20,45,.6), 0 2px 0 rgba(10,20,45,.4)',
-    });
-    stage.appendChild(el);
-  }
+  if (sub) subtitle(stage, w, sub);
   if (extra) stage.insertAdjacentHTML('beforeend', extra);
   if (safe) {   // Reels UI overlay, for checking the composition only
     const o = document.createElement('div');

@@ -32,7 +32,7 @@ function wallWords() {
   w[8 * COLS + 2] = 'late'; w[8 * COLS + 3] = 'because'; w[8 * COLS + 4] = 'bus'; w[9 * COLS + 3] = 'snowing';
   return w;
 }
-const TAG_COLOURS = [['#ef7a2f', '#ffffff'], ['#4f86c9', '#ffffff'], ['#f2b33a', '#7a3d12'], ['#ec6f60', '#ffffff'], ['#3f9a7a', '#ffffff'], ['#8a6ac8', '#ffffff'], ['#f08fa8', '#ffffff']];
+export const TAG_COLOURS = [['#ef7a2f', '#ffffff'], ['#4f86c9', '#ffffff'], ['#f2b33a', '#7a3d12'], ['#ec6f60', '#ffffff'], ['#3f9a7a', '#ffffff'], ['#8a6ac8', '#ffffff'], ['#f08fa8', '#ffffff']];
 
 const v3 = (a) => new THREE.Vector3(...a);
 function addTag(scene, word, [col, ink], pos, rot, scale = 1, o) {
@@ -41,7 +41,7 @@ function addTag(scene, word, [col, ink], pos, rot, scale = 1, o) {
 }
 
 // ---------------------------------------------------------------- the cold archive (shots 1 to 3)
-function archive(scene, { warm = 0 } = {}) {
+export function archive(scene, { warm = 0 } = {}) {
   scene.background = new THREE.Color('#1f2633');
   scene.add(new THREE.HemisphereLight('#b9c6dc', '#3a3f4a', 0.55 + 0.15 * warm));
   keyLight(scene, { pos: [-5, 9, 6], intensity: 2.1, size: 9, color: '#dfe8f5', map: 4096 });
@@ -50,7 +50,7 @@ function archive(scene, { warm = 0 } = {}) {
   const floor = feltMesh(new THREE.PlaneGeometry(30, 30, 2, 2), '#4b505b', { layers: 0, bump: 1.4, sheen: 0.3 });
   floor.rotation.x = -Math.PI / 2; scene.add(floor);
 }
-function bigWall(scene, o = {}) {
+export function bigWall(scene, o = {}) {
   const wall = cabinet({ rows: ROWS, cols: COLS, words: wallWords(), open: {}, grey: true, ...o });
   wall.scale.setScalar(1.5); scene.add(wall);
   return wall;
