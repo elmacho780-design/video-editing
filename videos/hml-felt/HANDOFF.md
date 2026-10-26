@@ -1,5 +1,15 @@
 # Handoff: "Words in boxes" (HML Academy Reel)
 
+> **Not OpenStoryline.** The branch name is historical. This is a code-rendered 3D animation project (three.js, rendered with headless Chromium via the Lemo-Opuscar library). Do not install OpenStoryline.
+
+## Start here (Batu's Windows PC)
+
+1. Clone the repo and check out the branch (Git for Windows or GitHub Desktop; the repo is private, so sign in to GitHub when asked):
+   `git clone https://github.com/elmacho780-design/video-editing.git` then `cd video-editing` and `git checkout claude/openstoryline-install-use-mj0u13`
+2. Install Node 20+, Python 3.11+ and ffmpeg (`winget install OpenJS.NodeJS.LTS Python.Python.3.12 Gyan.FFmpeg`), or work inside WSL2 Ubuntu (recommended by the library).
+3. Install the Lemo-Opuscar library (see "Set-up on a new machine" below), then render one still of `view=turn` and confirm the GPU is used (see the Windows notes).
+4. Then: animate shot 4 (the stitching) as a test clip for Batu to approve.
+
 Where the project stands, for a Claude Code session on Batu's own computer (Claude Desktop, or `claude remote-control` in this repo).
 Branch: `claude/openstoryline-install-use-mj0u13`.
 
