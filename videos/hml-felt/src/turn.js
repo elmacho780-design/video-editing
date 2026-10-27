@@ -14,7 +14,16 @@ export async function init(q) {
   stage.style.width = FW + 'px'; stage.style.height = FH + 'px';
   globalThis.FELT_Q = +(q.get('fq') || 0.8);
   S = setup(stage, { w: FW, h: FH, fov: 30, ssaa: +(q.get('ssaa') || 1.5), exposure: 0.9 });
-  const { scene, camera } = S;
+  const o = world(S.scene, S.camera);
+  S.post.dof.focus = o.focus; S.post.dof.aper = o.aper; S.post.dof.maxCoc = o.maxCoc;
+  S.post.bloom.strength = 0.1; S.post.bloom.threshold = 0.96;
+  S.post.vig.uniforms.amt.value = 0.3;
+  S.post.vig.uniforms.warm.value = 0.12;
+  await finish(S, stage, { w: FW, h: FH, sub: q.get('sub') ?? 'Үгийг цээжлэх биш, ойлгох.', safe: q.get('safe') });
+}
+
+// the hero frame's set, camera and post settings, with h: handles on the moving parts (animated in film.js)
+export function world(scene, camera) {
   const { groundH } = dawnWorld(scene);
   // her boot prints, leading in from the viewer's side
   const printM = new THREE.MeshStandardMaterial({ color: '#c9d3e6', roughness: 1, polygonOffset: true, polygonOffsetFactor: -2 });
@@ -33,19 +42,23 @@ export async function init(q) {
 
   // words in flight
   const tag = (word, color, pos, rot, ink) => { const t = wordTag(word, color, ink); t.position.set(...pos); t.rotation.set(...rot); scene.add(t); return t; };
-  tag('late', '#ef7a2f', [-0.6, 3.52, -0.3], [0.05, 0.3, 0.14]);
-  tag('snowing', '#4f86c9', [0.5, 4.1, -1.3], [0.1, -0.12, -0.07]);
-  tag('bus', '#f2b33a', [0.85, 1.95, -1.5], [0.0, -0.2, 0.1], '#7a3d12');
-  tag('because', '#ec6f60', [0.3, 2.85, 0.85], [-0.08, -0.22, 0.07]);
+  const tags = {
+    late: tag('late', '#ef7a2f', [-0.6, 3.52, -0.3], [0.05, 0.3, 0.14]),
+    snowing: tag('snowing', '#4f86c9', [0.5, 4.1, -1.3], [0.1, -0.12, -0.07]),
+    bus: tag('bus', '#f2b33a', [0.85, 1.95, -1.5], [0.0, -0.2, 0.1], '#7a3d12'),
+    because: tag('because', '#ec6f60', [0.3, 2.85, 0.85], [-0.08, -0.22, 0.07]),
+  };
   // "snowing" crumbles into felt snow as it flies; more snow drifts over the whole set
-  const r = mulberry(29);
+  const r = mulberry(29), trail = [], snow = [];
   for (let i = 0; i < 18; i++) {
     const t = i / 17;
-    scene.add(feltBlob('#fbf8f2', [1.1 + t * 1.3 + (r() - 0.5) * 0.3, 3.85 - t * 1.4 + (r() - 0.5) * 0.4, -1.3 - t * 0.5], [0.03 + r() * 0.03, 0.03 + r() * 0.03, 0.03 + r() * 0.03], [0, 0, 0], { len: 0.008, layers: 5 }));
+    const b = feltBlob('#fbf8f2', [1.1 + t * 1.3 + (r() - 0.5) * 0.3, 3.85 - t * 1.4 + (r() - 0.5) * 0.4, -1.3 - t * 0.5], [0.03 + r() * 0.03, 0.03 + r() * 0.03, 0.03 + r() * 0.03], [0, 0, 0], { len: 0.008, layers: 5 });
+    scene.add(b); trail.push(b);
   }
   for (let i = 0; i < 30; i++) {
     const s = 0.022 + r() * 0.03;
-    scene.add(feltBlob('#fbf8f2', [-2.4 + r() * 5, 0.5 + r() * 4.4, -5.5 + r() * 7], [s, s, s], [0, 0, 0], { len: 0.007, layers: 4 }));
+    const b = feltBlob('#fbf8f2', [-2.4 + r() * 5, 0.5 + r() * 4.4, -5.5 + r() * 7], [s, s, s], [0, 0, 0], { len: 0.007, layers: 4 });
+    scene.add(b); snow.push(b);
   }
   // close to the lens: out-of-focus drifts that frame the bottom of the shot
   [[-1.25, 5.2, 0.75, 0.3], [0.2, 5.6, 0.55, 0.2], [1.35, 4.9, 0.7, 0.32]].forEach(([x, z, rx, ry]) => scene.add(feltBlob('#fbfbfd', [x, -0.08, z], [rx, ry, 0.45], [0, 0, 0], { len: 0.012, layers: 6 })));
@@ -55,11 +68,7 @@ export async function init(q) {
 
   camera.position.set(-0.05, 1.3, 11.5);
   camera.lookAt(-0.05, 1.85, 1.5);
-  S.post.dof.focus = 9.7; S.post.dof.aper = 3.2; S.post.dof.maxCoc = 12;
-  S.post.bloom.strength = 0.1; S.post.bloom.threshold = 0.96;
-  S.post.vig.uniforms.amt.value = 0.3;
-  S.post.vig.uniforms.warm.value = 0.12;
-  await finish(S, stage, { w: FW, h: FH, sub: q.get('sub') ?? 'Үгийг цээжлэх биш, ойлгох.', safe: q.get('safe') });
+  return { focus: 9.7, aper: 3.2, maxCoc: 12, h: { bus, clock, tags, trail, snow, girl: gl } };
 }
 
 export function frame() {}

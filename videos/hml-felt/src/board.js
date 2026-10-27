@@ -32,7 +32,7 @@ function wallWords() {
   w[8 * COLS + 2] = 'late'; w[8 * COLS + 3] = 'because'; w[8 * COLS + 4] = 'bus'; w[9 * COLS + 3] = 'snowing';
   return w;
 }
-const TAG_COLOURS = [['#ef7a2f', '#ffffff'], ['#4f86c9', '#ffffff'], ['#f2b33a', '#7a3d12'], ['#ec6f60', '#ffffff'], ['#3f9a7a', '#ffffff'], ['#8a6ac8', '#ffffff'], ['#f08fa8', '#ffffff']];
+export const TAG_COLOURS = [['#ef7a2f', '#ffffff'], ['#4f86c9', '#ffffff'], ['#f2b33a', '#7a3d12'], ['#ec6f60', '#ffffff'], ['#3f9a7a', '#ffffff'], ['#8a6ac8', '#ffffff'], ['#f08fa8', '#ffffff']];
 
 const v3 = (a) => new THREE.Vector3(...a);
 function addTag(scene, word, [col, ink], pos, rot, scale = 1, o) {
@@ -41,7 +41,7 @@ function addTag(scene, word, [col, ink], pos, rot, scale = 1, o) {
 }
 
 // ---------------------------------------------------------------- the cold archive (shots 1 to 3)
-function archive(scene, { warm = 0 } = {}) {
+export function archive(scene, { warm = 0 } = {}) {
   scene.background = new THREE.Color('#1f2633');
   scene.add(new THREE.HemisphereLight('#b9c6dc', '#3a3f4a', 0.55 + 0.15 * warm));
   keyLight(scene, { pos: [-5, 9, 6], intensity: 2.1, size: 9, color: '#dfe8f5', map: 4096 });
@@ -50,13 +50,13 @@ function archive(scene, { warm = 0 } = {}) {
   const floor = feltMesh(new THREE.PlaneGeometry(30, 30, 2, 2), '#4b505b', { layers: 0, bump: 1.4, sheen: 0.3 });
   floor.rotation.x = -Math.PI / 2; scene.add(floor);
 }
-function bigWall(scene, o = {}) {
+export function bigWall(scene, o = {}) {
   const wall = cabinet({ rows: ROWS, cols: COLS, words: wallWords(), open: {}, grey: true, ...o });
   wall.scale.setScalar(1.5); scene.add(wall);
   return wall;
 }
 // a drawer's centre on the 1.5x wall
-const drawerAt = (r, c) => [(-(COLS - 1) * 0.27 + c * 0.54) * 1.5, (ROWS * 0.45 + 0.25 - 0.3 - r * 0.45) * 1.5, 0.47 * 1.5];
+export const drawerAt = (r, c) => [(-(COLS - 1) * 0.27 + c * 0.54) * 1.5, (ROWS * 0.45 + 0.25 - 0.3 - r * 0.45) * 1.5, 0.47 * 1.5];
 
 // a long dressmaker's pin: steel shaft, round head
 function pin(head = '#c23b3b') {
@@ -68,7 +68,8 @@ function pin(head = '#c23b3b') {
 }
 
 // ---------------------------------------------------------------- shots
-const SHOTS = {
+// each returns its post settings, plus h: handles on the moving parts, which the film (film.js) animates
+export const SHOTS = {
   // 1. Hook: an extreme close-up of one grey drawer, "because", rattling to get out
   1(scene, camera) {
     archive(scene);
@@ -81,9 +82,9 @@ const SHOTS = {
   },
 
   // 2. The wall: hundreds of grey drawers tower over her; a question card hangs in the air and she freezes
-  2(scene, camera) {
+  2(scene, camera, opt = {}) {
     archive(scene);
-    bigWall(scene);
+    const wall = bigWall(scene, opt.wall);
     const card = new THREE.Mesh(new RoundedBoxGeometry(2.1, 1.05, 0.02, 2, 0.01), [0, 0, 0, 0, 1, 1].map((k) => (k ? new THREE.MeshStandardMaterial({
       map: paperTex('#f6f0e2', {
         w: 1024, h: 512, seed: 5, draw: (g, w, h) => {
@@ -98,25 +99,27 @@ const SHOTS = {
     const gl = girl({ reach: 0, look: [0.15, 1], mood: 'worried', kick: 0 }); gl.position.set(0.2, 0, 2.6); gl.rotation.y = -0.1; scene.add(gl);
     camera.position.set(0.1, 0.9, 15.5);
     camera.lookAt(0, 3.15, 0);
-    return { focus: 12.9, aper: 1.6, maxCoc: 8 };
+    return { focus: 12.9, aper: 1.6, maxCoc: 8, h: { wall, card, girl: gl } };
   },
 
   // 3. The problem: she pulls words out, but each one stays pinned in place on its own, grey and separate
   3(scene, camera) {
     archive(scene);
-    bigWall(scene, { open: { late: 0.25, bus: 0.25, snowing: 0.25 } });
+    const wall = bigWall(scene, { open: { late: 0.25, bus: 0.25, snowing: 0.25 } });
     const greys = [['#9399a3', '#f1f2f4'], ['#a59f97', '#f6f3ee'], ['#8b929e', '#eef0f3']];
+    const tags = [];
     [['late', [-0.35, 3.3, 1.35], 0.12], ['bus', [0.78, 2.82, 1.35], -0.14], ['snowing', [-0.25, 2.28, 1.35], 0.06]].forEach(([w, p, rz], i) => {
       const t = addTag(scene, w, greys[i], p, [0, 0, rz], 1, { twine: false });
       const pn = pin(); pn.position.copy(t.localToWorld(t.userData.eyelet.clone())); pn.position.z += 0.03; scene.add(pn);
       // the pin runs back to the drawer it was taken from
       const shaftBack = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.65, 8), gloss('#c9ccd2', { metalness: 0.9, roughness: 0.25 }));
       shaftBack.rotation.x = Math.PI / 2; shaftBack.position.copy(pn.position); shaftBack.position.z -= 0.35; scene.add(shaftBack);
+      tags.push({ word: w, tag: t, pin: pn, shaft: shaftBack });
     });
     const gl = girl({ reach: 0.35, look: [-0.6, 0.7], mood: 'worried', kick: 0 }); gl.position.set(0.75, 0, 2.3); gl.rotation.y = -0.55; scene.add(gl);
     camera.position.set(0.45, 1.9, 8.6);
     camera.lookAt(0.1, 2.3, 1.0);
-    return { focus: 6.7, aper: 2.2, maxCoc: 10 };
+    return { focus: 6.7, aper: 2.2, maxCoc: 10, h: { wall, tags, girl: gl } };
   },
 
   // 4. The turn: an HML-orange yarn on a felting needle stitches the words into one sentence; each word it reaches takes colour
@@ -164,19 +167,20 @@ const SHOTS = {
     keyLight(scene, { pos: [4, 8, 8], intensity: 2.6, size: 9, color: '#ffd6a8', map: 4096 });
     const rim = new THREE.DirectionalLight('#9fb8ff', 0.8); rim.position.set(-6, 4, -2); scene.add(rim);
     const floor = feltMesh(new THREE.PlaneGeometry(30, 30, 2, 2), '#6b5a54', { layers: 0, bump: 1.4, sheen: 0.3 }); floor.rotation.x = -Math.PI / 2; scene.add(floor);
-    bigWall(scene, { grey: false, open: () => 0.12 + r() * 0.5 });
+    const wall = bigWall(scene, { grey: false, open: () => 0.12 + r() * 0.5 });
     // warm light pouring out of the open drawers
-    [[-1.5, 6.5], [1.2, 4.5], [-0.4, 2.8], [1.8, 8.4], [-2.0, 3.6]].forEach(([x, y]) => { const l = new THREE.PointLight('#ffb15e', 6, 4, 1.6); l.position.set(x, y, 1.6); scene.add(l); });
+    const glow = [[-1.5, 6.5], [1.2, 4.5], [-0.4, 2.8], [1.8, 8.4], [-2.0, 3.6]].map(([x, y]) => { const l = new THREE.PointLight('#ffb15e', 6, 4, 1.6); l.position.set(x, y, 1.6); scene.add(l); return l; });
+    const tags = [];
     for (let i = 0; i < 46; i++) {
       const t = r(), z = 1.4 + t * 8, spread = 1.2 + t * 2.2;
       const x = (r() - 0.5) * 2 * spread, y = 1.6 + r() * (6.5 - t * 2.5);
       if (z > 6 && Math.abs(x) < 0.9 && y < 3) continue;   // keep the girl clear
-      addTag(scene, WALL_WORDS[Math.floor(r() * WALL_WORDS.length)], TAG_COLOURS[i % TAG_COLOURS.length], [x, y, z], [(r() - 0.5) * 0.9, (r() - 0.5) * 1.4, (r() - 0.5) * 0.9], 0.8 + r() * 0.3);
+      tags.push(addTag(scene, WALL_WORDS[Math.floor(r() * WALL_WORDS.length)], TAG_COLOURS[i % TAG_COLOURS.length], [x, y, z], [(r() - 0.5) * 0.9, (r() - 0.5) * 1.4, (r() - 0.5) * 0.9], 0.8 + r() * 0.3));
     }
     const gl = girl({ reach: 1, look: [0.1, 1], mood: 'delighted', kick: 1 }); gl.position.set(-0.15, 0, 3.4); gl.rotation.y = 0.15; scene.add(gl);
     camera.position.set(0.05, 0.85, 13.5);
     camera.lookAt(0, 3.0, 0);
-    return { focus: 10.2, aper: 2.8, maxCoc: 14, bloom: 0.25 };
+    return { focus: 10.2, aper: 2.8, maxCoc: 14, bloom: 0.25, h: { wall, glow, tags, girl: gl } };
   },
 
   // 7. The proof: the bus ride ends in a paper London; a gold medal on her coat
@@ -228,10 +232,11 @@ const SHOTS = {
     const stage = feltMesh(new RoundedBoxGeometry(1.4, 0.32, 0.95, 3, 0.05), '#1e3a6e', { len: 0.008 }); stage.position.set(-0.05, 0.16, 1.2); scene.add(stage);
     const trim = new THREE.Mesh(new RoundedBoxGeometry(1.42, 0.04, 0.97, 2, 0.015), brass); trim.position.set(-0.05, 0.31, 1.2); scene.add(trim);
     const gl = girl({ reach: 1, look: [0.1, 0.6], mood: 'delighted', kick: 1, medal: true }); gl.position.set(-0.05, 0.32, 1.25); gl.rotation.y = 0.05; scene.add(gl);
-    for (let i = 0; i < 40; i++) { const s = 0.025 + r() * 0.03; scene.add(feltBlob(['#ee8a2c', '#f2b33a', '#ec6f60', '#4f86c9', '#fbf5e6'][i % 5], [(r() - 0.5) * 4, 1.2 + r() * 4, -1.5 + r() * 4], [s, s * 0.4, s], [r() * 3, r() * 3, r() * 3], { len: 0.006, layers: 3 })); }
+    const confetti = [];
+    for (let i = 0; i < 40; i++) { const s = 0.025 + r() * 0.03; const c = feltBlob(['#ee8a2c', '#f2b33a', '#ec6f60', '#4f86c9', '#fbf5e6'][i % 5], [(r() - 0.5) * 4, 1.2 + r() * 4, -1.5 + r() * 4], [s, s * 0.4, s], [r() * 3, r() * 3, r() * 3], { len: 0.006, layers: 3 }); scene.add(c); confetti.push(c); }
     camera.position.set(0, 1.45, 10.4);
     camera.lookAt(0, 2.05, 0.5);
-    return { focus: 9.2, aper: 2.2, maxCoc: 10 };
+    return { focus: 9.2, aper: 2.2, maxCoc: 10, h: { bus: dd, girl: gl, confetti } };
   },
 
   // 8. End card: the HML logo printed on card, sewn onto navy felt; the numbers on a paper strip; she waves goodbye
@@ -247,19 +252,23 @@ const SHOTS = {
     card.position.set(0, 2.95, -0.5); card.rotation.z = -0.02; card.castShadow = true; scene.add(card);
     // orange running stitch around the card
     const st = new THREE.MeshStandardMaterial({ color: '#ee8a2c', roughness: 0.9 });
+    const stitches = [];   // [side][k]: top, right, bottom, left
     for (let i = 0; i < 4; i++) for (let k = 0; k < 11; k++) {
       const t = -0.98 + k * 0.196 + 0.05, d = new THREE.Mesh(new RoundedBoxGeometry(0.11, 0.025, 0.02, 2, 0.01), st);
       const [x, y, rz] = [[t, 1.08, 0], [1.08, t, Math.PI / 2], [t, -1.08, 0], [-1.08, t, Math.PI / 2]][i];
       d.position.set(x, 2.95 + y, -0.47); d.rotation.z = rz; scene.add(d);
+      (stitches[i] ??= []).push(d);
     }
     // felt flowers from the logo's tree, gathered at the card's corners
     const r = mulberry(8);
     const flower = (x, y, s, col) => {
-      for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2 + 0.3; scene.add(feltBlob(col, [x + Math.cos(a) * s * 0.9, y + Math.sin(a) * s * 0.9, -0.42], [s * 0.62, s * 0.62, s * 0.28], [0, 0, 0], { len: 0.008, layers: 5 })); }
-      scene.add(feltBlob('#fff2c4', [x, y, -0.36], [s * 0.5, s * 0.5, s * 0.3], [0, 0, 0], { len: 0.006, layers: 4 }));
+      const f = new THREE.Group(); f.position.set(x, y, -0.42); scene.add(f);
+      for (let i = 0; i < 5; i++) { const a = (i / 5) * Math.PI * 2 + 0.3; f.add(feltBlob(col, [Math.cos(a) * s * 0.9, Math.sin(a) * s * 0.9, 0], [s * 0.62, s * 0.62, s * 0.28], [0, 0, 0], { len: 0.008, layers: 5 })); }
+      f.add(feltBlob('#fff2c4', [0, 0, 0.06], [s * 0.5, s * 0.5, s * 0.3], [0, 0, 0], { len: 0.006, layers: 4 }));
+      return f;
     };
-    [[-1.1, 4.0, 0.14, '#f39a2a'], [-0.82, 4.12, 0.09, '#ffc93c'], [1.08, 1.92, 0.15, '#f0561e'], [0.82, 1.8, 0.1, '#f7931e'], [1.15, 3.98, 0.08, '#ffc93c'], [-1.12, 1.9, 0.08, '#f7931e']].forEach(([x, y, s, c]) => flower(x, y, s, c));
-    [[-1.0, 3.8], [1.0, 2.1], [-1.25, 4.15], [0.95, 1.75]].forEach(([x, y]) => scene.add(feltBlob('#5f8f3a', [x + (r() - 0.5) * 0.1, y, -0.44], [0.09, 0.04, 0.02], [0, 0, r() * 3], { len: 0.005, layers: 3 })));
+    const flowers = [[-1.1, 4.0, 0.14, '#f39a2a'], [-0.82, 4.12, 0.09, '#ffc93c'], [1.08, 1.92, 0.15, '#f0561e'], [0.82, 1.8, 0.1, '#f7931e'], [1.15, 3.98, 0.08, '#ffc93c'], [-1.12, 1.9, 0.08, '#f7931e']].map(([x, y, s, c]) => flower(x, y, s, c));
+    const leaves = [[-1.0, 3.8], [1.0, 2.1], [-1.25, 4.15], [0.95, 1.75]].map(([x, y]) => { const l = feltBlob('#5f8f3a', [x + (r() - 0.5) * 0.1, y, -0.44], [0.09, 0.04, 0.02], [0, 0, r() * 3], { len: 0.005, layers: 3 }); scene.add(l); return l; });
     // the numbers and handle on a cream paper strip
     const strip = new THREE.Mesh(new RoundedBoxGeometry(2.3, 0.62, 0.02, 2, 0.01), [0, 0, 0, 0, 1, 1].map((k) => (k ? new THREE.MeshStandardMaterial({
       map: paperTex('#fbf5e6', {
@@ -273,7 +282,7 @@ const SHOTS = {
     const gl = girl({ reach: 1, look: [0.3, 0.2], mood: 'delighted', kick: 0 }); gl.position.set(-0.75, 0, 1.6); gl.rotation.y = 0.3; gl.scale.setScalar(0.62); scene.add(gl);
     camera.position.set(0, 2.45, 8.6);
     camera.lookAt(0, 2.45, 0);
-    return { focus: 9.0, aper: 0.8, maxCoc: 6 };
+    return { focus: 9.0, aper: 0.8, maxCoc: 6, h: { card, stitches, flowers, leaves, strip, girl: gl } };
   },
 };
 

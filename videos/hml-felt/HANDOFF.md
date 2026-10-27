@@ -9,13 +9,14 @@
 - **Storyboard:** `STORYBOARD.md`, sheet `stills/storyboard_0.jpg`, key frames `stills/board/s1_0.jpg` to `s8_0.jpg`. 8 shots, 24 s, 9:16.
 - **Decisions:** Mongolian subtitle lines approved as written. Batu records the voiceover himself (no generated voice). The proof shot is the HIPPO World Finals in London, gold medal. Her name on the question card is Saraa.
 - **Music:** `audio/score.py` (original score on CC0 samples), mastered `audio/out/music.wav` at -14 LUFS. Every hit is timed to a shot boundary (see the Music table in `STORYBOARD.md`).
-- **Animatic:** `renders/animatic.mp4` (still frames cut to the music; nothing animated yet).
+- **Animatic:** `renders/animatic.mp4` (still frames cut to the music).
+- **Shot 4 motion (test clip):** `src/shot4.js` (`?view=shot4`), rendered as `renders/shot4_test.mp4` (7.0 to 10.5 s, music muxed in). The needle stabs each eyelet on its stitch note, each tag floods with colour from its eyelet, warm light and her delight arrive at 8.0, the camera drifts down the garland onto the shot 4 key frame. Use it as the motion reference for the other shots.
+
+- **The film (approved by Batu):** `src/film.js` (`?view=film`, `window.DUR = 24`, deterministic `render(t)`), rendered with the music as `renders/film.mp4` (-14 LUFS). Every move lands on its cue in `audio/score.py`: the drawer rattles on the music box, the card lands on the bell at 3.0, the three words are pinned on their plucks, the stitches, the burst at 10.0, the whip pan at 12.0, the catch at 14.0, the medal on the crash at 18.0, the flowers on the music box's notes. The girl moves stop-motion style (pose variants swapped on twos); fast moves get sub-frame motion blur.
 
 ## Next (historical, already done)
 
-1. Animate one shot as a test clip: shot 4, the yarn stitching (7 to 10 s), timed to the stitch notes at 7.0, 7.5 ... 10.0.
-2. Once Batu approves the motion, animate all eight shots as one film, `view=film`, exposing `window.DUR = 24` and a deterministic `window.render(t)`.
-3. When his voiceover arrives: mix it over `music.wav` (duck the music under the voice), then mux and master to -14 LUFS.
+1. When his voiceover arrives: mix it over `music.wav` (duck the music under the voice), then mux and master to -14 LUFS.
 
 ## Code map
 
@@ -24,7 +25,9 @@
 - `src/set.js`: the shared set (cabinet incl. the grey archive wall, word tags, bus, gers, hills, skyline, clock, `dawnWorld`, `finish`).
 - `src/board.js`: the eight storyboard shots (`?view=board&s=N`). Reuse these scenes as the animation's start and end poses.
 - `src/turn.js`: the hero frame (shot 6). `src/cast.js`: cast sheet. `src/storyboard.js`: the sheet.
-- The still views render once inside `init()` and swap in an image, to dodge the 30 s screenshot timeout on a CPU-only machine. An animated view must draw per frame in `render(t)` instead.
+- `src/film.js`: the film. It builds one scene at a time from the storyboard scenes (`SHOTS` in `board.js` and `world()` in `turn.js` return `h`, handles on their moving parts; `shot4.js` exports `build(S)`), so the key frames stay the start and end poses. Shots 1 and 2 share one set.
+- The still views render once inside `init()` and swap in an image, to dodge the 30 s screenshot timeout on a CPU-only machine. The animated views (`shot4`, `film`) draw per frame in `render(t)` instead.
+- Render the film from `$LIB`: `node core/render/video.mjs <repo>/videos/hml-felt --workers 4 --size 1080x1920 --q 'view=film&ssaa=1.5&fq=1' --out <tmp>/film_silent.mp4`, then `sh core/render/mux.sh <tmp>/film_silent.mp4 <repo>/videos/hml-felt/audio/out/music.wav <repo>/videos/hml-felt/renders/film.mp4 24 2`. About 22 s on the RTX 5060.
 
 ## Set-up on a new machine
 
@@ -53,6 +56,7 @@ Rebuild the music and the animatic (from the project folder): `$LIB/.venv/bin/py
 - **First check the GPU is in use.** Render one still and read the output: the line `[note] WebGL runs on software rendering` means Chromium fell back to the CPU (this cloud machine took about 35 s per full-quality frame that way).
 - If that note appears, choose the ANGLE backend with `LEMO_ANGLE`: in WSL try `LEMO_ANGLE=vulkan`, then `LEMO_ANGLE=gl`. Natively on Windows (Git Bash) try `LEMO_ANGLE=d3d11`. Re-render until the note is gone, and time a frame.
 - If WSL cannot reach the GPU in headless Chromium, render natively on Windows with `LEMO_ANGLE=d3d11` and keep WSL for the Python music scripts.
+- **As set up (October 2026):** native Windows, no WSL. Library at `C:\Users\user\lemo-opuscar`; its venv has a junction `.venv\bin` -> `.venv\Scripts` so the POSIX scripts find Python. Headless Chromium reports `ANGLE (NVIDIA GeForce RTX 5060 ... Direct3D11)` with no `LEMO_ANGLE` set; the turn still takes about 0.1 s, and the shot 4 clip (84 frames) 6 s. Run the `sh` scripts from Git Bash.
 
 ## House rules
 
