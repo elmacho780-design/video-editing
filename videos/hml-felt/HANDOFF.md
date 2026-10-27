@@ -1,17 +1,7 @@
-# Handoff: "Words in boxes" (HML Academy Reel)
+# "Words in boxes" (HML Academy Reel): FINISHED
 
-> **Not OpenStoryline.** The branch name is historical. This is a code-rendered 3D animation project (three.js, rendered with headless Chromium via the Lemo-Opuscar library). Do not install OpenStoryline.
-
-## Start here (Batu's Windows PC)
-
-1. Clone the repo and check out the branch (Git for Windows or GitHub Desktop; the repo is private, so sign in to GitHub when asked):
-   `git clone https://github.com/elmacho780-design/video-editing.git` then `cd video-editing` and `git checkout claude/openstoryline-install-use-mj0u13`
-2. Install Node 20+, Python 3.11+ and ffmpeg (`winget install OpenJS.NodeJS.LTS Python.Python.3.12 Gyan.FFmpeg`), or work inside WSL2 Ubuntu (recommended by the library).
-3. Install the Lemo-Opuscar library (see "Set-up on a new machine" below), then render one still of `view=turn` and confirm the GPU is used (see the Windows notes).
-4. Then: animate shot 4 (the stitching) as a test clip for Batu to approve.
-
-Where the project stands, for a Claude Code session on Batu's own computer (Claude Desktop, or `claude remote-control` in this repo).
-Branch: `claude/openstoryline-install-use-mj0u13`.
+> **This project is complete.** Batu finished the animation on his own PC. Do not continue, re-render or redo it.
+> For new work, read `CLAUDE.md` at the repo root. This file is kept only as a record of how the film was set up.
 
 ## Done and approved
 
@@ -21,7 +11,7 @@ Branch: `claude/openstoryline-install-use-mj0u13`.
 - **Music:** `audio/score.py` (original score on CC0 samples), mastered `audio/out/music.wav` at -14 LUFS. Every hit is timed to a shot boundary (see the Music table in `STORYBOARD.md`).
 - **Animatic:** `renders/animatic.mp4` (still frames cut to the music; nothing animated yet).
 
-## Next
+## Next (historical, already done)
 
 1. Animate one shot as a test clip: shot 4, the yarn stitching (7 to 10 s), timed to the stitch notes at 7.0, 7.5 ... 10.0.
 2. Once Batu approves the motion, animate all eight shots as one film, `view=film`, exposing `window.DUR = 24` and a deterministic `window.render(t)`.
