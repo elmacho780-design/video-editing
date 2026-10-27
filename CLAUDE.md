@@ -40,7 +40,7 @@ Read **`videos/_handoff/HML_ACADEMY_CONTEXT.md`** (Batu's own brief: classes, ol
 |---|---|---|
 | `videos/sorry-zaya/` | 10 s personal 3D film ("I'm sorry Zaya") | three.js |
 | `videos/hml-style-samples/` | First art-style tests for "Words in boxes" (flat words, toy 3D, pop-up) | three.js / SVG, rejected in favour of felt |
-| `videos/hml-felt/` | **"Words in boxes"** animated Reel: memorised words in drawers vs words in context. **Finished by Batu on his own PC.** | Needle-felt + paper in three.js (`src/felt.js` shell-fur wool shader), original orchestral score `audio/score.py` |
+| `videos/hml-felt/` | **"Words in boxes"** animated Reel (24 s): memorised words in drawers vs words in context. Animated on Batu's RTX 5060 PC; final `renders/film.mp4` | Needle-felt + paper in three.js (`src/felt.js` shell-fur wool shader), stop-motion character moves, `src/film.js` timeline, original orchestral score `audio/score.py` |
 | `videos/reference-edits/` | Frame-by-frame study of 3 reference Reels (captions, cards, transitions, timings) | `REFERENCE.md`, `tools/strip.py` |
 | `videos/hml-olympiad-reel/` | **Olympiad talking-head edit** (basketball hook → teacher on camera, captions, cards, comic shout, 3+1 offer, end card). Final: `renders/hml-olympiad-reel.mp4` | "HML notebook" look: paper, stickers, washi tape, stamps, sticker captions; HTML/CSS rendered per frame; Whisper word-timed captions |
 
@@ -48,7 +48,7 @@ Read **`videos/_handoff/HML_ACADEMY_CONTEXT.md`** (Batu's own brief: classes, ol
 - **`hml-olympiad-reel/src/ui.js` + `theme.css`:** sticker captions, notebook cards, the bloom-wipe transition from the HML tree, split-flap numbers, confetti, comic shout, end card.
 - **`hml-olympiad-reel/src/edit.js`:** the cut list → output-time mapping, captions timed to Whisper word timestamps, footage punch-ins, cue export (`window.EV`).
 - **`hml-olympiad-reel/audio/`:** `voice.py` (untouched voice + cuts), `score.py` (music and SFX from the cue list, ducked), `final.py` + `master.sh` (one gain to -14 LUFS, a gentle limiter, mux).
-- **`hml-felt/src/felt.js`:** the needle-felt material. **`hml-felt/audio/score.py`:** an orchestral score timed to shots.
+- **`hml-felt/src/felt.js`:** the needle-felt material. **`hml-felt/src/film.js`:** a whole 3D film on one music timeline (stop-motion posing, sub-frame motion blur). **`hml-felt/audio/score.py`:** an orchestral score timed to shots.
 - **`reference-edits/tools/strip.py`:** frame-by-frame strips of any video.
 
 ## 4. Set up a new machine (do this first on a fresh PC)

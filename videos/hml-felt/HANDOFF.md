@@ -14,9 +14,9 @@
 
 - **The film (approved by Batu):** `src/film.js` (`?view=film`, `window.DUR = 24`, deterministic `render(t)`), rendered with the music as `renders/film.mp4` (-14 LUFS). Every move lands on its cue in `audio/score.py`: the drawer rattles on the music box, the card lands on the bell at 3.0, the three words are pinned on their plucks, the stitches, the burst at 10.0, the whip pan at 12.0, the catch at 14.0, the medal on the crash at 18.0, the flowers on the music box's notes. The girl moves stop-motion style (pose variants swapped on twos); fast moves get sub-frame motion blur.
 
-## Next (historical, already done)
+## Next
 
-1. When his voiceover arrives: mix it over `music.wav` (duck the music under the voice), then mux and master to -14 LUFS.
+Nothing. The film is finished (`renders/film.mp4`); Batu handled the final version himself.
 
 ## Code map
 
