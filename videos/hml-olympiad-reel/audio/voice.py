@@ -10,7 +10,9 @@ from core.audio.sfx import SR
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 KEEP = [[0.0, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]]
 SHOUT = (35.28, 36.74)
-DUR = json.load(open(os.path.join(ROOT, 'edit', 'events.json')))['dur']
+_E = json.load(open(os.path.join(ROOT, 'edit', 'events.json')))
+DUR = _E['dur']
+KEEP = next((e['keep'] for e in _E['ev'] if e['type'] == 'keep'), KEEP)   # the cut list exported by src/edit.js
 
 raw = subprocess.run(['ffmpeg', '-nostdin', '-loglevel', 'error', '-i', os.path.join(ROOT, 'src', 'footage.mov'), '-af', 'pan=mono|c0=c0,aresample=48000:resampler=soxr:precision=28', '-f', 'f32le', '-'], capture_output=True, check=True).stdout
 x = np.frombuffer(raw, np.float32).astype(np.float64)

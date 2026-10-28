@@ -42,7 +42,7 @@ Read **`videos/_handoff/HML_ACADEMY_CONTEXT.md`** (Batu's own brief: classes, ol
 | `videos/hml-style-samples/` | First art-style tests for "Words in boxes" (flat words, toy 3D, pop-up) | three.js / SVG, rejected in favour of felt |
 | `videos/hml-felt/` | **"Words in boxes"** animated Reel (24 s): memorised words in drawers vs words in context. Animated on Batu's RTX 5060 PC; final `renders/film.mp4` | Needle-felt + paper in three.js (`src/felt.js` shell-fur wool shader), stop-motion character moves, `src/film.js` timeline, original orchestral score `audio/score.py` |
 | `videos/reference-edits/` | Frame-by-frame study of 3 reference Reels (captions, cards, transitions, timings) | `REFERENCE.md`, `tools/strip.py` |
-| `videos/hml-olympiad-reel/` | **Olympiad talking-head edit** (basketball hook → teacher on camera, captions, cards, comic shout, 3+1 offer, end card). Final: `renders/hml-olympiad-reel.mp4` | "HML notebook" look: paper, stickers, washi tape, stamps, sticker captions; HTML/CSS rendered per frame; Whisper word-timed captions |
+| `videos/hml-olympiad-reel/` | **Olympiad talking-head edit** (basketball hook → teacher on camera, captions, cards, comic shout, 3+1 offer, end card). Final: `renders/hml-olympiad-reel.mp4`; "ending first" cut (no hook, no banner, opens on the shout): `renders/hml-olympiad-reel-ending-first.mp4` | "HML notebook" look: paper, stickers, washi tape, stamps, sticker captions; HTML/CSS rendered per frame; Whisper word-timed captions |
 
 **Reusable parts worth stealing:**
 - **`hml-olympiad-reel/src/ui.js` + `theme.css`:** sticker captions, notebook cards, the bloom-wipe transition from the HML tree, split-flap numbers, confetti, comic shout, end card.

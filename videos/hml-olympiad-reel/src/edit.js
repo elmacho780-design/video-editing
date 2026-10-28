@@ -4,7 +4,9 @@ import * as U from './ui.js';
 const { clamp, backOut, easeOut } = U;
 
 // ---------------------------------------------------------------- cuts: keep these source ranges, pauses between them removed
-const KEEP = [[0.0, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]];
+// ?start=0.95 drops the Essential English banner opening (the "ending first" version starts on her)
+const START = typeof location !== 'undefined' ? +(new URLSearchParams(location.search).get('start') || 0) : 0;
+const KEEP = [[START, 9.27], [9.53, 13.55], [13.95, 26.0], [26.3, 28.58], [28.82, 46.0]];
 const HOLD = 1.0, LAST = 1379;
 let acc = 0;
 const SEG = KEEP.map(([a, b], i) => { const s = { a, b, o: acc, i }; acc += b - a; return s; });
@@ -124,7 +126,8 @@ function sceneAt(src, frame) {
 // ---------------------------------------------------------------- sound and music cues (output seconds), exported for the mix
 export const EV = (() => {
   const ev = [], add = (src, type, extra = {}) => ev.push({ t: +O(src).toFixed(3), type, ...extra });
-  add(0.12, 'whoosh'); [W1, W2, W3].forEach((w) => add(w - 0.05, 'whoosh'));
+  if (START < 0.12) add(0.12, 'whoosh');
+  [W1, W2, W3].forEach((w) => add(w - 0.05, 'whoosh'));
   CARDS.forEach(([a, , , , anim]) => { if (anim !== 'none') add(a, 'slap'); });
   TILES.forEach(([a, b], i) => { add(a, 'tile', { n: i }); add(b, 'tick'); });
   for (let k = 0; k < 16; k++) add(FLAP0 + (k / 16) * FLAP_DUR, 'flap');
@@ -133,6 +136,7 @@ export const EV = (() => {
   add(36.75, 'ding'); add(36.75, 'musicGo');
   PAGES.forEach((p) => add(p, 'page')); add(PLUS, 'pop'); add(GIFT, 'tada'); add(FREE, 'pop');
   add(W3 + WD, 'chime'); add(8.78, 'pop'); add(41.64, 'pop');
+  ev.push({ t: 0, type: 'keep', keep: KEEP });             // the cut list, for audio/voice.py
   return ev.sort((a, b) => a.t - b.t);
 })();
 

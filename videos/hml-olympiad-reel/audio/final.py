@@ -1,6 +1,7 @@
 """Final audio: the basketball hook (its own sound, lifted, plus a whoosh on the camera whip and an impact as the ball hits the lens)
 followed by the edit's mix, mastered to -14 LUFS with one plain gain and a gentle look-ahead peak limiter (no dynamic loudness processing).
-Writes audio/out/final.wav (48 kHz). Run after audio/score.py: $LIB/.venv/bin/python audio/final.py"""
+Writes audio/out/final.wav (48 kHz). Run after audio/score.py: $LIB/.venv/bin/python audio/final.py
+"Ending first" version: HOOK=0 ROTATE=33.1667 (no basketball hook; the mix from frame 995 = 33.17 s, the crash zoom, moves to the front, then 0 to 33.13 s)."""
 import os, sys, re, subprocess
 LIB = os.environ.get('LIB', '/root/lemo-opuscar'); sys.path.insert(0, LIB)
 import numpy as np, soundfile as sf
@@ -20,7 +21,13 @@ add(hook, X.thump(1.0, 70), 3.97, 0.45, 0); add(hook, X.pop(1.0), 3.97, 0.22, 0)
 hook[-int(0.004 * SR):] *= np.linspace(1, 0, int(0.004 * SR))[:, None]; hook[:int(0.02 * SR)] *= np.linspace(0, 1, int(0.02 * SR))[:, None]
 
 mix, _ = sf.read(os.path.join(OUT, 'mix.wav'), dtype='float64')
-full = np.vstack([hook, mix])
+ROT = float(os.environ.get('ROTATE', 0))
+if ROT:
+    k = int(round(ROT * SR)); f = int(0.005 * SR)
+    a, b = mix[k:].copy(), mix[:k].copy()
+    for seg in (a, b): seg[:f] *= np.linspace(0, 1, f)[:, None]; seg[-f:] *= np.linspace(1, 0, f)[:, None]
+    mix = np.vstack([a, b])
+full = np.vstack([hook, mix]) if os.environ.get('HOOK', '1') != '0' else mix
 sf.write(os.path.join(OUT, 'final_raw.wav'), full.astype(np.float32), SR, subtype='FLOAT')
 meas = subprocess.run(['ffmpeg', '-nostdin', '-hide_banner', '-i', os.path.join(OUT, 'final_raw.wav'), '-af', 'ebur128', '-f', 'null', '-'], capture_output=True, text=True).stderr
 I = float(re.findall(r'I:\s+(-?[\d.]+) LUFS', meas)[-1])
