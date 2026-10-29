@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="mn"><head><meta charset="utf-8"><title>HML 3+1 poster</title>
+<!-- HML Academy "3+1" poster, after the Chupa Chups layout: giant cropped letters behind a glossy hero product
+     (our Essential English book, rendered in 3D from its PDF), a golden diagonal plane, the logo top right,
+     a stacked headline with an outlined middle word, the offer, the phone numbers and a round stamp.
+     Every size is in vw (the viewport is the poster: 1 vw = 1% of its width; it is 141.42 vw tall, A-series).
+     Render: node core/render/still.mjs <this folder> 0 --size 3508x4960 --prefix poster_ --out <dir> -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<style>
+  :root { --cream: #f6f0e4; --sun: #ffc23d; --fire: #f26a1b; --orange: #fda00a; --navy: #0a2f52; --blue: #114879; }
+  html, body { margin: 0; background: var(--cream); overflow: hidden; }
+  #poster { position: relative; width: 100vw; height: 141.42vw; overflow: hidden; background: var(--cream); font-family: Montserrat, sans-serif; color: var(--navy); }
+  #poster > * { position: absolute; }
+  .plane { inset: 0; background: var(--sun); clip-path: polygon(74% 21.6%, 100% 19%, 100% 100%, 38% 100%); z-index: 1; }
+  .dot { border-radius: 50%; z-index: 2; }
+  .giant { z-index: 3; font-weight: 900; line-height: 1; color: var(--fire); letter-spacing: -0.04em; white-space: nowrap; }
+  #gl { left: 0; top: 0; width: 100vw; height: 141.42vw; z-index: 4; }
+  .type { z-index: 5; }
+  .logo { right: 5vw; top: 3.6vw; width: 29vw; z-index: 5; }
+  .tag { left: 66vw; top: 21.4vw; font-weight: 800; font-size: 1.95vw; line-height: 1.22; letter-spacing: 0.06em; color: var(--fire); }
+  .head { left: 6vw; top: 102.5vw; font-weight: 900; font-size: 6.3vw; line-height: 1.02; letter-spacing: 0.01em; }
+  .head .outline { font-family: 'Montserrat Outline', Montserrat, sans-serif; color: transparent; -webkit-text-stroke: 0.22vw var(--navy); }
+  .head .hot { color: var(--fire); }
+  .offer { left: 6.2vw; top: 124.6vw; font-weight: 700; font-size: 2.05vw; line-height: 1.32; letter-spacing: 0.05em; text-transform: uppercase; }
+  .offer b { color: var(--fire); font-weight: 900; }
+  .phones { left: 6vw; bottom: 3.6vw; font-weight: 800; font-size: 2.35vw; letter-spacing: 0.04em; display: flex; align-items: center; gap: 1.3vw; }
+  .phones svg { width: 2.6vw; height: 2.6vw; }
+  .phones i { font-style: normal; color: var(--fire); }
+  .stamp { left: 47.5vw; bottom: 3.2vw; width: 14vw; height: 14vw; }
+</style></head>
+<body><div id="poster">
+  <div class="plane"></div>
+  <div class="dot" style="left:-13vw; top:92vw; width:30vw; height:30vw; background:var(--sun)"></div>
+  <div class="dot" style="left:60.5vw; top:24vw; width:4.6vw; height:4.6vw; background:var(--sun)"></div>
+  <div class="dot" style="left:38vw; top:100vw; width:4.2vw; height:4.2vw; background:var(--fire)"></div>
+  <div class="dot" style="left:52vw; top:111vw; width:2.2vw; height:2.2vw; background:var(--navy)"></div>
+  <div class="dot" style="left:90vw; top:60vw; width:2.4vw; height:2.4vw; background:var(--navy)"></div>
+
+  <!-- 3, +, 1 in a Z down the poster, the way Chu / p / ps runs -->
+  <div class="giant" id="g3" style="left:-5vw; top:-17vw; font-size:78vw">3</div>
+  <div class="giant" id="gp" style="left:-8vw; top:38vw; font-size:60vw">+</div>
+  <div class="giant" id="g1" style="right:1.5vw; bottom:-21vw; font-size:84vw">1</div>
+
+  <canvas id="gl"></canvas>
+
+  <img class="logo" src="assets/logo.png" alt="Higher Mind Learning">
+  <div class="type tag">ҮГИЙГ ЦЭЭЖЛЭХ БИШ,<br>ОЙЛГОХ.</div>
+  <div class="type head">3+1<br><span class="outline">ХӨТӨЛБӨР</span><br><span class="hot">ЗАРЛАГДЛАА</span></div>
+  <div class="type offer">3 сараар бүртгүүлээд<br><b>1 сар үнэгүй</b><br>сургалтандаа суралцаарай</div>
+  <div class="type phones">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+    <span>9930 4451 <i>·</i> 8888 3351</span>
+  </div>
+  <svg class="type stamp" viewBox="0 0 200 200">
+    <defs><path id="ring" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
+    <circle cx="100" cy="100" r="96" fill="none" stroke="#0a2f52" stroke-width="2.2"/>
+    <circle cx="100" cy="100" r="61" fill="none" stroke="#0a2f52" stroke-width="1.4"/>
+    <text font-family="Montserrat" font-weight="800" font-size="15.2" letter-spacing="2.4" fill="#0a2f52"><textPath href="#ring" startOffset="0" textLength="489" lengthAdjust="spacing">1 САР ҮНЭГҮЙ • 3+1 ХӨТӨЛБӨР •</textPath></text>
+    <image href="assets/brain.png" x="62" y="70" width="76" height="59"/>
+  </svg>
+</div>
+<script type="module">
+import { renderBook } from './book.js';
+const q = new URLSearchParams(location.search);
+const num = (k, d) => (q.has(k) ? +q.get(k) : d);
+await Promise.all(['900', '800', '700'].map((w) => document.fonts.load(`${w} 60px Montserrat`, 'ҮӨЗ 3+1 ABC')));
+await document.fonts.load(`900 60px "Montserrat Outline"`, 'ХӨТӨЛБӨР');
+await Promise.all([...document.images].map((i) => i.decode()));
+const cv = document.getElementById('gl');
+await renderBook(cv, {
+  width: innerWidth, height: Math.round(innerWidth * 1.4142),
+  cx: num('cx', 54), cy: num('cy', 65), size: num('size', 73),
+  rx: num('rx', 12), ry: num('ry', 27), rz: num('rz', -10),
+  fov: num('fov', 15), gap: num('gap', 95), light: [num('lx', -650), num('ly', 650), num('lz', 1200)],
+  key: num('key', 2.7), rim: num('rim', 0.9), top: num('top', 1.5), face: num('face', 0.98), env: num('env', 1.0), exposure: num('exp', 1.0), gloss: num('gloss', 0.06),
+  strip: num('strip', 52), stripY: num('stripY', 1), stripTilt: num('stripTilt', 28), stripK: num('stripK', 0),
+  sheen: num('sheen', 0.3), falloff: num('falloff', 0.16), band: num('band', 0.36), bandAngle: num('bandAngle', 58),
+  shadow: num('shadow', 0.32), shadowColor: '#5a3304', soft: num('soft', 40),
+});
+window.DUR = 1;
+window.render = () => {};
+window.READY = true;
+</script></body></html>
