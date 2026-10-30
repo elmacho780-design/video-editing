@@ -33,7 +33,7 @@ export async function init() {
       <div style="margin-top:14px;font:600 23px/1.45 Manrope;color:#33374a"><b style="color:#14295a">Captions</b> ${L.caps}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">${L.sw.map(sw).join('')}</div>
       <div style="margin-top:14px;font:800 22px Manrope;color:#8a8378">${L.type}</div></div>
-    ${MOMENTS.map((m, i) => `<img src="stills/frames/${L.o}${i + 1}_0.jpg" style="width:400px;height:711px;border-radius:18px;box-shadow:0 12px 28px rgba(20,30,60,.22);display:block">`).join('')}</div>`;
+    ${MOMENTS.map((m, i) => `<img src="stills/looks/${L.o}${i + 1}_0.jpg" style="width:400px;height:711px;border-radius:18px;box-shadow:0 12px 28px rgba(20,30,60,.22);display:block">`).join('')}</div>`;
   stage.innerHTML = `<div style="padding:64px 70px">
     <div style="display:flex;align-items:flex-end;gap:26px"><div style="font:900 70px Unbounded;line-height:1">Онлайн сургалт Reel</div>
       <div style="font:800 32px Manrope;color:#f0561e;padding-bottom:6px">three looks to choose from</div>
