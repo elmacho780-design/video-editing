@@ -1,0 +1,9 @@
+/* HML online Reel: what all three looks share. Each look adds its own styles (src/a.js, b.js, c.js). */
+html, body { margin: 0; background: #000; overflow: hidden; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Manrope, sans-serif; }
+.abs { position: absolute; }
+.layer { position: absolute; inset: 0; }
+.footage { position: absolute; inset: 0; background-size: cover; background-position: center; transform-origin: 50% 45%;
+  filter: contrast(1.06) saturate(1.05) brightness(1.02); }
+.grade { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 70% at 50% 45%, rgba(255, 225, 190, 0.05), rgba(10, 20, 50, 0.18) 100%); }
