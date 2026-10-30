@@ -15,6 +15,8 @@ A talking-head ad for HML's online classes. Final file: `renders/hml-online-reel
 - `src/footage.mov`: his 42 s CapCut export. It isn't in git; download it from the Drive link Batu sent.
 - `frames/`: every source frame as a JPEG (`ffmpeg -i src/footage.mov -fps_mode passthrough -q:v 2 -start_number 0 frames/%05d.jpg`).
 - `tools/align.py`: Whisper large-v3 word timings per take, written to `edit/align.json`.
+- `tools/facetrack.py`: his face position on every frame, written to `edit/face.json` (OpenCV 4.x Haar detector; the walk-in frames before he is in shot are blanked).
+  The round stickers on the full-screen pages play the live footage cropped to his face and pop on when he walks in. The end card loops his smile after "Баярлалаа".
 - `src/edit.js` (`?view=edit`) is the whole edit as one deterministic `render(t)`:
   - The cut list (`KEEP` in `src/common.js`) drops his walks in and out of frame.
   - Where he talks while still walking in (output 0:05, 0:19 and 0:24), a full-screen notebook page covers the picture and his voice carries on. The page then flips up to reveal him with the card.
@@ -23,7 +25,8 @@ A talking-head ad for HML's online classes. Final file: `renders/hml-online-reel
 - `src/a.js`: the look's components. `src/b.js` and `src/c.js` are the two looks that weren't chosen.
 - Audio:
   - `audio/voice.py`: his voice untouched, one channel, cut with 10 ms fades.
-  - `audio/score.py`: the original café score and effects from `edit/events.json`, ducked under the voice. Uses CC0 samples from VSCO 2 CE, VCSL and FreePats.
+  - `audio/score.py`: the original café score from `edit/events.json`, ducked under the voice. It's one continuous piece in F major at about 103 BPM, with bars set from the picture so the end card lands on bar 14.
+    Every cue is a note in the key (harp glissandi into the transitions, harp, kalimba, marimba, glockenspiel), never synthesised noise: Batu rejected the whooshes. It uses CC0 samples from VSCO 2 CE, VCSL and FreePats.
   - `audio/final.py`: one gain to -14 LUFS and a look-ahead limiter.
   - `audio/master.sh`: the mux.
 
