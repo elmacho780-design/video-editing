@@ -69,10 +69,19 @@ const notebook = (w = 190) => `<svg width="${w}" height="${w * 1.15}" viewBox="0
   <text x="114" y="96" text-anchor="middle" font-family="Unbounded" font-weight="900" font-size="46" fill="#14295a">ABC</text>
   <path d="M70 118h88M70 138h70M70 158h80" stroke="#4ea3ff" stroke-width="5" stroke-linecap="round"/>
   <image href="assets/hml-tree.png" x="122" y="164" width="44" height="34"/></svg>`;
-// his face as a round photo sticker, taped to the page (from a still where he is settled)
-export const photo = (src, { x, y, d = 280, r = 4 }) => `
-  <div class="abs" style="left:${x}px;top:${y}px;width:${d}px;height:${d}px;border-radius:50%;border:9px solid #fff;box-shadow:10px 12px 0 var(--orange),var(--lift);overflow:hidden;transform:rotate(${r}deg)">
-    <img src="${src}" style="position:absolute;left:50%;top:0;height:${Math.round(d * 2.3)}px;transform:translate(-50%,${-Math.round(d * 0.66)}px)"></div>${tape(x + d / 2 - 90, y - 22, 10)}`;
+// his face as a round photo sticker taped to the page. `me` is a still's path, or { src, box, on }: box = [cx, cy, w] from
+// edit/face.json, so the live frame is cropped to keep his face filling the circle as he talks and walks in; on (0..1) pops it on
+export const photo = (me, { x, y, d = 280, r = 4 }) => {
+  const m = typeof me === 'string' ? { src: me, on: 1 } : me;
+  if (!m || !(m.on > 0)) return '';
+  let img;
+  if (m.box) {
+    const [cx, cy, w] = m.box, k = (0.56 * d) / w;
+    img = `<img src="${m.src}" style="position:absolute;max-width:none;left:${(d / 2 - cx * k).toFixed(1)}px;top:${(d / 2 - (cy + 0.05 * w) * k).toFixed(1)}px;width:${(1080 * k).toFixed(1)}px;height:${(1920 * k).toFixed(1)}px">`;
+  } else img = `<img src="${m.src}" style="position:absolute;left:50%;top:0;height:${Math.round(d * 2.3)}px;transform:translate(-50%,${-Math.round(d * 0.66)}px)">`;
+  return `<div class="layer" style="transform-origin:${x + d / 2}px ${y + d / 2}px;${pop(m.on)}">
+    <div class="abs" style="left:${x}px;top:${y}px;width:${d}px;height:${d}px;border-radius:50%;border:9px solid #fff;box-shadow:10px 12px 0 var(--orange),var(--lift);overflow:hidden;transform:rotate(${r}deg);background:#ddd">${img}</div>${tape(x + d / 2 - 90, y - 22, 10)}</div>`;
+};
 // a full-screen notebook page: ruled paper, the margin line, a faint HML tree and a coffee ring
 export const page = (inner, { ring = [880, 1420] } = {}) => `<div class="a-page"></div>
   <div class="abs" style="left:110px;top:0;bottom:0;width:4px;background:rgba(255,106,43,.5)"></div>
@@ -94,7 +103,7 @@ export const hookCard = ({ cup: c = 1, eq = 1, book = 1, y = 262 } = {}) => `
 // ---------------------------------------------------------------- 2. why online
 // the three reasons as big rows on a full-screen page (it covers his walk into frame), his face as a photo sticker
 export const painsPage = (face, { rows = [1, 1, 1], head = 1 } = {}) => page(`${brand()}
-  <div class="layer" style="transform-origin:880px 350px;${pop(head * 1.4 - 0.4)}">${photo(face, { x: 770, y: 236, d: 236 })}</div>
+  ${photo(face, { x: 770, y: 236, d: 236 })}
   <div class="layer" style="transform-origin:330px 380px;${pop(head)}"><div class="a-stk" style="left:150px;top:310px;font:900 48px/1.15 Unbounded;padding:16px 28px 20px;transform:rotate(-3deg)">Танд<br>тохиолддог уу?</div></div>
   ${PAINS.map(([ic, t], i) => rows[i] <= 0 ? '' : `<div class="abs" style="left:150px;top:${620 + i * 230}px;width:860px;display:flex;align-items:center;gap:30px;transform-origin:430px 90px;
     transform:rotate(${(i % 2 ? 1.2 : -1.2) + (1 - clamp(rows[i])) * 10}deg) scale(${(0.6 + 0.4 * backOut(rows[i])).toFixed(3)});opacity:${clamp(rows[i] * 4)}">
@@ -178,7 +187,7 @@ export const loyaltyCard = ({ stamps = [1, 1, 1], plus = 1, free = 1, x = 70, y 
   </div>`;
 // full-screen: the card on the page, big, while he walks into frame ("Энэ дээр мөн адил манай 3+1")
 export const loyaltyPage = (face, { head = 1, ...opts } = {}) => page(`${brand()}
-  <div class="layer" style="transform-origin:830px 366px;${pop(head * 1.4 - 0.4)}">${photo(face, { x: 700, y: 236, d: 260 })}</div>
+  ${photo(face, { x: 700, y: 236, d: 260 })}
   <div class="layer" style="transform-origin:340px 380px;${pop(head)}"><div class="a-stk or" style="left:150px;top:330px;font:900 54px Unbounded;padding:14px 30px 18px;transform:rotate(-4deg)">Урамшуулал</div></div>
   ${loyaltyCard({ x: 70, y: 700, s: 1.04, r: -3, ...opts })}`);
 
@@ -211,7 +220,7 @@ export const endCard = (face, { logo = 1, board = 1, stickers = 1, me = 1, flipp
   <div class="abs" style="left:110px;top:1336px;display:flex;gap:24px;align-items:center;transform-origin:200px 40px;${pop(stickers)}">
     <div class="a-stk" style="position:relative;font:900 36px Unbounded;padding:14px 26px;transform:rotate(-3deg);background:#4ea3ff;box-shadow:6px 7px 0 var(--navy),var(--lift)">@hml_english</div>
     <div class="a-stk or" style="position:relative;font:900 36px Unbounded;padding:14px 26px;transform:rotate(3deg)">3+1</div></div>
-  <div class="layer" style="transform-origin:875px 1365px;${pop(me)}">${photo(face, { x: 760, y: 1250, d: 230, r: -5 })}</div>`, { ring: [930, 820] });
+  ${photo(typeof face === 'string' ? { src: face, on: me } : face, { x: 760, y: 1250, d: 230, r: -5 })}`, { ring: [930, 820] });
 
 // ---------------------------------------------------------------- the signature transition: the coffee steam grows into the HML tree
 // three limbs rise from the cup's steam, fork twice, flowers open at the tips; the next scene shows through the blooms

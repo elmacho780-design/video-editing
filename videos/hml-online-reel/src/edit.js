@@ -17,8 +17,14 @@ const inOut = (u) => { u = clamp(u); return u < 0.5 ? 4 * u * u * u : 1 - (-2 * 
 const easeIn = (u) => clamp(u) ** 3;
 const lin = (src, a, d = 0.3) => (src - a) / d;                   // 0..1 animation progress from a source time
 
-// faces for the photo stickers on the pages (stills where he is settled)
-const FACE = { pains: 'frames/00315.jpg', week: 'frames/00807.jpg', loyal: 'frames/00972.jpg', end: 'frames/01128.jpg' };
+// the round face stickers on the pages play the live footage, cropped to his face (edit/face.json, tools/facetrack.py);
+// each pops on the moment he walks into shot
+let TRACK = [];
+const FACE_IN = { pains: 7.5, week: 24.0, loyal: 30.45 };
+const live = (src, from) => { const i = Math.min(LAST, Math.max(0, Math.round(src * 30))), box = TRACK[i];
+  return box ? { src: frameUrl(src), box, on: lin(src, from, 0.3) } : null; };
+// the end card: his smile after "Баярлалаа" (37.92 to 38.42), played forwards and back like a boomerang
+const smile = (t) => { const u = ((t - TEND + 0.25) % 1.0 + 1.0) % 1.0, f = u < 0.5 ? u : 1 - u; return 37.92 + f; };
 
 // ---------------------------------------------------------------- key source times (from the word timings)
 const WIPE1 = [5.30, 5.75];          // steam wipe: his question → the "does this happen to you?" page
@@ -105,10 +111,10 @@ const cardsAt = (src, t) => CARDS.map(([a, b, origin, html]) => {
 }).join('');
 
 // ---------------------------------------------------------------- the full-screen pages
-const painsPage = (s) => A.painsPage(FACE.pains, { rows: [lin(s, ROWS[0]), lin(s, ROWS[1]), 0], head: s < 6.92 ? lin(s, WIPE1[0] + 0.25, 0.3) : 1 });
-const weekPage = () => A.weekPage(FACE.week);
-const loyalPage = (s) => A.loyaltyPage(FACE.loyal, { stamps: STAMPS.map((a) => lin(s, a, 0.12)), plus: lin(s, PLUS, 0.25), free: lin(s, FREE, 0.25) });
-const endAt = (t) => { const e = (d) => (t - (TEND - 0.24) - d) / 0.32; return A.endCard(FACE.end, { logo: e(0.0), board: e(0.22), stickers: e(0.42), me: e(0.55) }); };
+const painsPage = (s) => A.painsPage(live(s, FACE_IN.pains), { rows: [lin(s, ROWS[0]), lin(s, ROWS[1]), 0], head: s < 6.92 ? lin(s, WIPE1[0] + 0.25, 0.3) : 1 });
+const weekPage = (s) => A.weekPage(live(s, FACE_IN.week));
+const loyalPage = (s) => A.loyaltyPage(live(s, FACE_IN.loyal), { stamps: STAMPS.map((a) => lin(s, a, 0.12)), plus: lin(s, PLUS, 0.25), free: lin(s, FREE, 0.25) });
+const endAt = (t) => { const e = (d) => (t - (TEND - 0.24) - d) / 0.32; const f = smile(t), me = live(f, 0); if (me) me.on = e(0.55); return A.endCard(me, { logo: e(0.0), board: e(0.22), stickers: e(0.42) }); };
 // a page flips up and away (u 0..1) / drops in from above (u 0..1)
 const flipUp = (html, u) => `<div class="layer" style="transform-origin:540px 0;transform:translateY(${(-2000 * easeIn(u)).toFixed(1)}px) rotate(${(-5 * easeIn(u)).toFixed(2)}deg);box-shadow:0 30px 60px rgba(0,0,0,.35)">${html}</div>`;
 const dropIn = (html, u) => { const y = u >= 1 ? 0 : -1950 * (1 - backOut(u, 1.2)); return `<div class="layer" style="transform:translateY(${y.toFixed(1)}px) rotate(${(3 * (1 - easeOut(u))).toFixed(2)}deg);box-shadow:0 30px 60px rgba(0,0,0,.35)">${html}</div>`; };
@@ -118,13 +124,13 @@ export const EV = (() => {
   const ev = [], add = (src, type, extra = {}) => ev.push({ t: +O(src).toFixed(3), type, ...extra });
   add(CUP, 'clink'); add(EQ, 'draw'); add(BOOK, 'pop'); add(QUESTION, 'ding');
   add(WIPE1[0], 'whoosh'); add(WIPE1[0], 'swell', { len: WIPE1[1] - WIPE1[0] });
-  add(ROWS[0], 'slap'); add(ROWS[1], 'slap'); add(FLIP1, 'page'); add(ROWS[2], 'slap');
+  add(ROWS[0], 'slap'); add(ROWS[1], 'slap'); add(FLIP1, 'flip'); add(ROWS[2], 'slap');
   STRIKE.forEach((a) => add(a, 'draw')); add(STAMP1, 'stamp');
   ev.push({ t: +O(WIPE2[0]).toFixed(3), type: 'whoosh' }, { t: +O(WIPE2[0]).toFixed(3), type: 'swell', len: WIPE2[1] - WIPE2[0] });
   add(TAGS[1], 'slap'); TICKS.forEach((a) => add(a, 'tick')); add(STAMP2, 'stamp');
-  add(DROP3[0], 'page'); add(FLIP3, 'page');
+  add(DROP3[0], 'drop'); add(FLIP3, 'flip');
   CIRCLES.forEach((a, i) => { add(a, 'draw'); add(a, 'day', { n: i }); }); add(TIME, 'pop');
-  add(DROP4[0], 'page'); STAMPS.forEach((a, i) => add(a, 'stamp', { soft: 1, n: i })); add(PLUS, 'kaching'); add(FREE, 'pop'); add(FLIP4, 'page');
+  add(DROP4[0], 'drop'); STAMPS.forEach((a, i) => add(a, 'stamp', { soft: 1, n: i })); add(PLUS, 'kaching'); add(FREE, 'pop'); add(FLIP4, 'flip');
   add(LOYAL_OUT, 'whoosh', { soft: 1 }); add(BOARD_IN, 'slap');
   for (let k = 0; k < 16; k++) add(FLAP0 + (k / 16) * FLAP_DUR, 'flap');
   add(WIPE5[0], 'whoosh'); add(WIPE5[0], 'swell', { len: WIPE5[1] - WIPE5[0] });
@@ -138,6 +144,7 @@ export const EV = (() => {
 // ---------------------------------------------------------------- page
 let ov;
 export async function init() {
+  TRACK = (await (await fetch('edit/face.json')).json()).face;
   document.head.insertAdjacentHTML('beforeend', `<style>${A.css}</style>`);
   document.getElementById('stage').innerHTML = '<div id="ov" class="layer"></div>';
   ov = document.getElementById('ov');
@@ -155,9 +162,9 @@ export async function frame(t) {
   else if (t >= T(FLIP4) && t < T(FLIP4) + FLIPD) g = base() + flipUp(loyalPage(src), (t - T(FLIP4)) / FLIPD) + captionAt(t);
   else if (t >= T(DROP4[1]) && t < T(FLIP4)) g = loyalPage(src) + captionAt(t);
   else if (t >= T(DROP4[0]) && t < T(DROP4[1])) g = base() + dropIn(loyalPage(29.4), (t - T(DROP4[0])) / (T(DROP4[1]) - T(DROP4[0])));
-  else if (t >= T(FLIP3) && t < T(FLIP3) + FLIPD) g = base() + flipUp(weekPage(), (t - T(FLIP3)) / FLIPD) + captionAt(t);
-  else if (t >= T(DROP3[1]) && t < T(FLIP3)) g = weekPage() + captionAt(t);
-  else if (t >= T(DROP3[0]) && t < T(DROP3[1])) g = base() + dropIn(weekPage(), (t - T(DROP3[0])) / (T(DROP3[1]) - T(DROP3[0])));
+  else if (t >= T(FLIP3) && t < T(FLIP3) + FLIPD) g = base() + flipUp(weekPage(src), (t - T(FLIP3)) / FLIPD) + captionAt(t);
+  else if (t >= T(DROP3[1]) && t < T(FLIP3)) g = weekPage(src) + captionAt(t);
+  else if (t >= T(DROP3[0]) && t < T(DROP3[1])) g = base() + dropIn(weekPage(23.25), (t - T(DROP3[0])) / (T(DROP3[1]) - T(DROP3[0])));
   else if (t >= T(WIPE2[0]) && t < T(WIPE2[1])) {
     // from: the last frame of take 2 with its card; to: take 3, held on the frame where he is in place
     const p = inOut((t - T(WIPE2[0])) / (T(WIPE2[1]) - T(WIPE2[0]))), w = A.steamParts(p);
