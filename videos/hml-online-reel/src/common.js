@@ -21,7 +21,7 @@ export const kw = (t, cls = 'kw') => t.replace(/\*(.+?)\*/g, `<span class="${cls
 // days of the week (Даваа … Ням); classes on Tuesday, Thursday, Saturday ("хоёрдох, дөрөвдөх, хагас сайн")
 export const DAYS = ['Да', 'Мя', 'Лх', 'Пү', 'Ба', 'Бя', 'Ня'];
 export const ON = [1, 3, 5];
-export const PAINS = [['car', 'Хүргэж өгөх боломжгүй'], ['moon', 'Хичээл орой тардаг'], ['school', 'Танхимд суух боломжгүй']];
+export const PAINS = [['car', 'Хүүхдээ хүргэж өгөх боломжгүй'], ['moon', 'Хичээлээ орой тардаг'], ['school', 'Танхимаар суух боломжгүй']];
 
 // ---------------------------------------------------------------- line icons (24 x 24)
 const P = {
@@ -35,6 +35,7 @@ const P = {
   gift: '<rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M2.5 9h19v-.5M12 9v11.5M12 9c-1.5-4-6-4.5-6-2s4 2 6 2zm0 0c1.5-4 6-4.5 6-2s-4 2-6 2z"/>',
   phone: '<path d="M21 16.4v2.9a1.9 1.9 0 0 1-2.1 1.9A18.9 18.9 0 0 1 2.8 5.1 1.9 1.9 0 0 1 4.7 3h2.9a1.9 1.9 0 0 1 1.9 1.6c.1.9.4 1.8.7 2.7a1.9 1.9 0 0 1-.4 2L8.5 10.6a15.2 15.2 0 0 0 5.7 5.7l1.3-1.3a1.9 1.9 0 0 1 2-.4c.9.3 1.8.6 2.7.7a1.9 1.9 0 0 1 1.6 1.9z"/>',
   play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  clock: '<circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v4.8l3 1.8"/>',
 };
 export const icon = (name, { s = 40, c = 'currentColor', w = 2.3 } = {}) =>
   `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${P[name]}</svg>`;
@@ -63,6 +64,6 @@ export const coffeeRing = ({ x, y, r = 70, o = 0.3, seed = 3 } = {}) => `
       <path d="M${r + 20 - r * 0.92} ${r + 20 + r * 0.25} A${r * 0.95} ${r * 0.95} 0 0 1 ${r + 20 + r * 0.6} ${r + 20 - r * 0.72}" stroke-width="3"/></g></svg>`;
 
 // the cut list (source seconds): the five takes without his walks in and out of frame, then a 2 s end card
-export const KEEP = [[0.72, 5.45], [6.92, 14.75], [16.18, 22.45], [23.25, 28.25], [29.40, 38.10]];
+export const KEEP = [[0.72, 5.75], [6.92, 14.75], [16.18, 22.55], [23.25, 28.25], [29.40, 38.40]];
 export const END = 2.0;
 export const O = (src) => { let o = 0; for (const [a, b] of KEEP) { if (src <= b) return o + Math.max(0, src - a); o += b - a; } return o; };

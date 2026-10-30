@@ -93,9 +93,9 @@ export const hookCard = ({ cup: c = 1, eq = 1, book = 1, y = 262 } = {}) => `
 
 // ---------------------------------------------------------------- 2. why online
 // the three reasons as big rows on a full-screen page (it covers his walk into frame), his face as a photo sticker
-export const painsPage = (face, { rows = [1, 1, 1] } = {}) => page(`${brand()}
-  ${photo(face, { x: 770, y: 236, d: 236 })}
-  <div class="a-stk" style="left:150px;top:310px;font:900 48px/1.15 Unbounded;padding:16px 28px 20px;transform:rotate(-3deg)">Танд<br>тохиолддог уу?</div>
+export const painsPage = (face, { rows = [1, 1, 1], head = 1 } = {}) => page(`${brand()}
+  <div class="layer" style="transform-origin:880px 350px;${pop(head * 1.4 - 0.4)}">${photo(face, { x: 770, y: 236, d: 236 })}</div>
+  <div class="layer" style="transform-origin:330px 380px;${pop(head)}"><div class="a-stk" style="left:150px;top:310px;font:900 48px/1.15 Unbounded;padding:16px 28px 20px;transform:rotate(-3deg)">Танд<br>тохиолддог уу?</div></div>
   ${PAINS.map(([ic, t], i) => rows[i] <= 0 ? '' : `<div class="abs" style="left:150px;top:${620 + i * 230}px;width:860px;display:flex;align-items:center;gap:30px;transform-origin:430px 90px;
     transform:rotate(${(i % 2 ? 1.2 : -1.2) + (1 - clamp(rows[i])) * 10}deg) scale(${(0.6 + 0.4 * backOut(rows[i])).toFixed(3)});opacity:${clamp(rows[i] * 4)}">
     <span style="flex:none;width:130px;height:130px;border-radius:50%;background:var(--navy);display:grid;place-items:center;box-shadow:7px 8px 0 var(--orange)">${icon(ic, { s: 70, c: '#fff' })}</span>
@@ -106,8 +106,8 @@ export const painsCard = ({ rows = [1, 1, 1], strike = [1, 1, 1], stampOn = 1, y
     ${tape(640, -24, 5, 'or')}
     ${PAINS.map(([ic, t], i) => rows[i] <= 0 ? '' : `<div class="abs" style="left:100px;top:${46 + i * 120}px;display:flex;align-items:center;gap:24px;transform-origin:40px 42px;${pop(rows[i])}">
       <span style="width:84px;height:84px;border-radius:50%;background:var(--navy);display:grid;place-items:center;box-shadow:5px 6px 0 var(--orange)">${icon(ic, { s: 46, c: '#fff' })}</span>
-      <span style="font:800 40px Manrope;color:var(--navy);letter-spacing:-.5px">${t}</span></div>`).join('')}
-    <svg class="abs" style="left:190px;top:0" width="720" height="440">${[0, 1, 2].map((i) => marker(`M10 ${90 + i * 120} C160 ${84 + i * 120 + (i % 2) * 8} 330 ${94 + i * 120} ${[468, 390, 470][i]} ${86 + i * 120}`, { w: 8, p: strike[i] })).join('')}</svg>
+      <span style="font:800 38px Manrope;color:var(--navy);letter-spacing:-.5px">${t}</span></div>`).join('')}
+    <svg class="abs" style="left:190px;top:0" width="720" height="440">${[0, 1, 2].map((i) => marker(`M10 ${90 + i * 120} C160 ${84 + i * 120 + (i % 2) * 8} 330 ${94 + i * 120} ${[668, 470, 556][i]} ${86 + i * 120}`, { w: 8, p: strike[i] })).join('')}</svg>
     ${stampOn > 0 ? stamp('ОНЛАЙН', 'СУРГАЛТ', { x: 470, y: 268, r: -10, s: 0.82 * (1 + 0.6 * (1 - easeOut(stampOn))), o: clamp(stampOn * 3) }) : ''}
   </div>`;
 
@@ -117,10 +117,10 @@ const tag = (t, x, y, r, tick) => `<div class="abs" style="left:${x}px;top:${y}p
     box-shadow:7px 8px 0 var(--navy);font:900 36px Unbounded;white-space:nowrap">
     <span style="position:absolute;left:20px;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:var(--paper);border:4px solid var(--navy)"></span>${t}</div>
   <div class="abs" style="right:-46px;top:-40px">${tick > 0 ? handCheck(tick, 104) : ''}</div></div>`;
-export const tagsCard = ({ ticks = [1, 1], stampOn = 1, y = 262 } = {}) => `
+export const tagsCard = ({ ent = [1, 1], ticks = [1, 1], stampOn = 1, y = 262 } = {}) => `
   <div class="a-paper" style="left:70px;top:${y}px;width:940px;height:420px;transform:rotate(-1deg)"><div class="margin"></div>
     ${tape(120, -24, -7, 'or')}${tape(680, -22, 5)}
-    ${tag('Олимпиадын бэлтгэл', 100, 50, -3, ticks[0])}${tag('Түвшин ахиулах', 150, 196, 2, ticks[1])}
+    ${ent[0] > 0 ? `<div class="layer" style="transform-origin:300px 100px;${pop(ent[0])}">${tag('Олимпиадын бэлтгэл', 100, 50, -3, ticks[0])}</div>` : ''}${ent[1] > 0 ? `<div class="layer" style="transform-origin:360px 246px;${pop(ent[1])}">${tag('Түвшин ахиулах', 150, 196, 2, ticks[1])}</div>` : ''}
     ${stampOn > 0 ? stamp('БҮГД', 'БАГТСАН', { x: 520, y: 262, r: 6, s: 0.56 * (1 + 0.6 * (1 - easeOut(stampOn))), o: clamp(stampOn * 3) }) : ''}
   </div>`;
 
@@ -133,15 +133,16 @@ const weekRow = (circles, { x = 96, y = 150, w = 100, gap = 14, h = 150, fs = 40
     return `<div style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;border-radius:16px;background:${on ? 'var(--navy)' : '#fff'};border:4px solid var(--navy);box-shadow:${on ? '6px 7px 0 var(--orange)' : 'none'};
       display:flex;flex-direction:column;align-items:center;justify-content:${top ? 'flex-start;padding-top:26px;background-image:repeating-linear-gradient(180deg,transparent 0 56px,rgba(78,163,255,.22) 56px 58px);background-position:0 80px' : 'center'};gap:6px;transform:rotate(${on ? [-4, 3, -3][k] : 0}deg)">
       <span class="uni" style="font:900 ${fs}px Unbounded;color:${on ? '#fff' : 'var(--navy)'}">${d}</span>
-      ${on ? `<span style="font:800 ${Math.round(fs / 2)}px Manrope;color:#ffb27f">хичээл</span>` : `<span style="height:${Math.round(fs * 0.6)}px"></span>`}</div>`; }).join('')}</div>
+      ${on ? `<span style="font:800 ${Math.round(fs * 0.55)}px Manrope;color:#ffb27f">17:00</span>` : `<span style="height:${Math.round(fs * 0.6)}px"></span>`}</div>`; }).join('')}</div>
     <svg class="abs" style="left:0;top:0;overflow:visible" width="10" height="10">${ON.map((i, k) => { const cx = x + i * pitch + w / 2, t = y - 18, b = y + h + 22, rx = w * 0.82;
       return marker(`M${cx - 6} ${t} C${cx + rx} ${t - 6} ${cx + rx} ${b - 4} ${cx - 2} ${b} C${cx - rx} ${b + 4} ${cx - rx} ${t + 8} ${cx + 10} ${t - 4}`, { w: 7, p: circles[k] }); }).join('')}</svg>`;
 };
-export const weekCard = ({ circles = [1, 1, 1], y = 270 } = {}) => `
+export const weekCard = ({ circles = [1, 1, 1], time = 1, y = 270 } = {}) => `
   <div class="a-paper" style="left:70px;top:${y}px;width:940px;height:400px;transform:rotate(-1deg)"><div class="margin"></div>
     ${tape(110, -24, -7)}${tape(690, -22, 6, 'or')}${coffeeRing({ x: 860, y: 330, r: 58, o: 0.26, seed: 5 })}
     <div class="abs" style="left:100px;top:34px;display:flex;align-items:center;gap:16px"><span style="color:var(--orange)">${icon('cal', { s: 52, w: 2.6 })}</span>
-      <span class="uni" style="font:900 46px Unbounded;color:var(--navy)">Хуваарь</span><span class="a-stk kr" style="position:relative;font-size:26px;padding:6px 16px;transform:rotate(3deg);margin-left:10px">онлайн</span></div>
+      <span class="uni" style="font:900 46px Unbounded;color:var(--navy)">Хуваарь</span><span class="a-stk kr" style="position:relative;font-size:26px;padding:6px 16px;transform:rotate(3deg);margin-left:10px">онлайн</span>
+      ${time > 0 ? `<span class="a-stk or" style="position:relative;display:flex;align-items:center;gap:8px;font:900 34px Unbounded;padding:6px 18px 8px 12px;margin-left:12px;transform:rotate(-4deg) scale(${backOut(time).toFixed(3)});opacity:${clamp(time * 4)}">${icon('clock', { s: 34, c: '#fff', w: 2.6 })}17:00</span>` : ''}</div>
     ${weekRow(circles)}
   </div>`;
 // the full-screen planner page that covers his walk into frame ("Хуваарийн хувьд гэх юм бол")
@@ -150,6 +151,7 @@ export const weekPage = (face) => page(`${brand()}
   <div class="abs" style="left:150px;top:330px;display:flex;align-items:center;gap:20px"><span style="color:var(--orange)">${icon('cal', { s: 84, w: 2.4 })}</span>
     <span class="uni" style="font:900 84px Unbounded;color:var(--navy);letter-spacing:-2px">Хуваарь</span></div>
   <div class="a-stk kr" style="left:160px;top:470px;font-size:34px;transform:rotate(-3deg)">долоо хоног бүр · онлайн</div>
+  <div class="a-stk or" style="left:640px;top:456px;display:flex;align-items:center;gap:10px;font:900 44px Unbounded;padding:8px 22px 10px 14px;transform:rotate(4deg)">${icon('clock', { s: 44, c: '#fff', w: 2.6 })}17:00</div>
   <div class="a-paper" style="left:120px;top:620px;width:860px;height:600px;transform:rotate(1deg);background-image:none;background:#fff">
     ${tape(330, -24, -3, 'or')}
     ${weekRow([0, 0, 0], { x: 30, y: 90, w: 104, gap: 12, h: 430, fs: 42, top: true })}</div>`, { ring: [900, 1500] });
@@ -175,9 +177,9 @@ export const loyaltyCard = ({ stamps = [1, 1, 1], plus = 1, free = 1, x = 70, y 
     ${free > 0 ? `<div class="a-stk" style="left:668px;top:330px;font:900 34px Unbounded;transform:rotate(-7deg) scale(${backOut(free).toFixed(3)})">ҮНЭГҮЙ</div>` : ''}
   </div>`;
 // full-screen: the card on the page, big, while he walks into frame ("Энэ дээр мөн адил манай 3+1")
-export const loyaltyPage = (face, opts = {}) => page(`${brand()}
-  ${photo(face, { x: 700, y: 236, d: 260 })}
-  <div class="a-stk or" style="left:150px;top:330px;font:900 54px Unbounded;padding:14px 30px 18px;transform:rotate(-4deg)">Урамшуулал</div>
+export const loyaltyPage = (face, { head = 1, ...opts } = {}) => page(`${brand()}
+  <div class="layer" style="transform-origin:830px 366px;${pop(head * 1.4 - 0.4)}">${photo(face, { x: 700, y: 236, d: 260 })}</div>
+  <div class="layer" style="transform-origin:340px 380px;${pop(head)}"><div class="a-stk or" style="left:150px;top:330px;font:900 54px Unbounded;padding:14px 30px 18px;transform:rotate(-4deg)">Урамшуулал</div></div>
   ${loyaltyCard({ x: 70, y: 700, s: 1.04, r: -3, ...opts })}`);
 
 // ---------------------------------------------------------------- 6. contact: split-flap numbers on a paper card
@@ -200,15 +202,16 @@ export const phoneBoard = ({ flipped = 99, y = 230, left = 70, scale = 0.92 } = 
 };
 
 // ---------------------------------------------------------------- 7. end card
-export const endCard = (face) => page(`
+export const endCard = (face, { logo = 1, board = 1, stickers = 1, me = 1, flipped = 99 } = {}) => page(`
+  <div class="layer" style="transform-origin:540px 536px;${pop(logo)}">
   <div class="abs" style="left:190px;top:236px;width:700px;height:600px;background:#fff url(assets/hml-logo.png) 50% 46%/104% no-repeat;border:6px solid var(--navy);border-radius:26px;box-shadow:12px 14px 0 var(--orange),var(--lift);transform:rotate(-2deg)"></div>
-  ${tape(250, 212, -10)}${tape(680, 216, 9, 'or')}
-  <div class="abs die" style="left:60px;top:700px;transform:rotate(-10deg)">${cup({ w: 150 })}</div>
-  ${phoneBoard({ y: 900, left: 70, scale: 1 })}
-  <div class="abs" style="left:110px;top:1336px;display:flex;gap:24px;align-items:center">
+  ${tape(250, 212, -10)}${tape(680, 216, 9, 'or')}</div>
+  <div class="layer" style="transform-origin:140px 800px;${pop(logo * 1.3 - 0.3)}"><div class="abs die" style="left:60px;top:700px;transform:rotate(-10deg)">${cup({ w: 150 })}</div></div>
+  <div class="layer" style="transform-origin:540px 1090px;${pop(board)}">${phoneBoard({ y: 900, left: 70, scale: 1, flipped })}</div>
+  <div class="abs" style="left:110px;top:1336px;display:flex;gap:24px;align-items:center;transform-origin:200px 40px;${pop(stickers)}">
     <div class="a-stk" style="position:relative;font:900 36px Unbounded;padding:14px 26px;transform:rotate(-3deg);background:#4ea3ff;box-shadow:6px 7px 0 var(--navy),var(--lift)">@hml_english</div>
     <div class="a-stk or" style="position:relative;font:900 36px Unbounded;padding:14px 26px;transform:rotate(3deg)">3+1</div></div>
-  ${photo(face, { x: 760, y: 1250, d: 230, r: -5 })}`, { ring: [930, 820] });
+  <div class="layer" style="transform-origin:875px 1365px;${pop(me)}">${photo(face, { x: 760, y: 1250, d: 230, r: -5 })}</div>`, { ring: [930, 820] });
 
 // ---------------------------------------------------------------- the signature transition: the coffee steam grows into the HML tree
 // three limbs rise from the cup's steam, fork twice, flowers open at the tips; the next scene shows through the blooms
@@ -225,7 +228,7 @@ function branches() {
 const BR = branches();
 const qpt = (b, t) => [(1 - t) ** 2 * b.x + 2 * (1 - t) * t * b.mx + t * t * b.x2, (1 - t) ** 2 * b.y + 2 * (1 - t) * t * b.my + t * t * b.y2];
 const circ = (cx, cy, r) => r <= 0.5 ? '' : `M${(cx - r).toFixed(1)} ${cy.toFixed(1)}a${r.toFixed(1)} ${r.toFixed(1)} 0 1 0 ${(2 * r).toFixed(1)} 0a${r.toFixed(1)} ${r.toFixed(1)} 0 1 0 ${(-2 * r).toFixed(1)} 0Z`;
-export const steamWipe = (fromHtml, toHtml, p) => {
+export const steamParts = (p) => {
   const vis = (b) => clamp(p * 3.2 - b.depth * 0.7), bloom = (b) => Math.max(0, vis(b) - 0.85) / 0.15;
   let clip = '';
   BR.forEach((b) => { const v = vis(b); if (v <= 0.02) return; for (let t = 0; t <= v; t += 0.04) { const [cx, cy] = qpt(b, t); clip += circ(cx, cy, b.w * 0.8 + 380 * Math.max(0, p - 0.3)); } });
@@ -238,7 +241,11 @@ export const steamWipe = (fromHtml, toHtml, p) => {
     BR.filter((b) => b.depth >= 1 && vis(b) > 0.85).map((b) => { const s = Math.min(1, bloom(b) * 1.4) * (b.depth === 2 ? 46 : 32);
       return `<g transform="translate(${b.x2.toFixed(0)} ${b.y2.toFixed(0)}) rotate(${b.depth * 20})">${[0, 1, 2, 3, 4].map((k) => `<ellipse cx="${(Math.cos(k * 1.2566) * s * 0.85).toFixed(1)}" cy="${(Math.sin(k * 1.2566) * s * 0.85).toFixed(1)}" rx="${(s * 0.62).toFixed(1)}" ry="${(s * 0.5).toFixed(1)}" transform="rotate(${k * 72} ${(Math.cos(k * 1.2566) * s * 0.85).toFixed(1)} ${(Math.sin(k * 1.2566) * s * 0.85).toFixed(1)})" fill="#ffc93c"/>`).join('')}<circle r="${(s * 0.42).toFixed(1)}" fill="#f0561e"/></g>`; }).join('')}</g></svg>`;
   const cupHtml = `<div class="abs" style="left:380px;top:1380px;opacity:${fade};transform-origin:160px 420px;${pop(cupIn)}"><div class="die">${cup({ w: 320, steamOn: 0 })}</div></div>`;
-  return `<div class="layer">${fromHtml}</div><div class="layer" style="clip-path:path('${clip || 'M0 0Z'}')">${toHtml}</div>${lines}${cupHtml}`;
+  return { clip: clip || 'M0 0Z', lines, cup: cupHtml };
+};
+export const steamWipe = (fromHtml, toHtml, p) => {
+  const w = steamParts(p);
+  return `<div class="layer">${fromHtml}</div><div class="layer" style="clip-path:path('${w.clip}')">${toHtml}</div>${w.lines}${w.cup}`;
 };
 
 // ---------------------------------------------------------------- the style frames (?view=frames&o=a&f=1..4)
