@@ -108,7 +108,7 @@ const cardsAt = (src, t) => CARDS.map(([a, b, origin, html]) => {
 const painsPage = (s) => A.painsPage(FACE.pains, { rows: [lin(s, ROWS[0]), lin(s, ROWS[1]), 0], head: s < 6.92 ? lin(s, WIPE1[0] + 0.25, 0.3) : 1 });
 const weekPage = () => A.weekPage(FACE.week);
 const loyalPage = (s) => A.loyaltyPage(FACE.loyal, { stamps: STAMPS.map((a) => lin(s, a, 0.12)), plus: lin(s, PLUS, 0.25), free: lin(s, FREE, 0.25) });
-const endAt = (t) => { const e = (d) => (t - TEND - d) / 0.32; return A.endCard(FACE.end, { logo: e(0.0), board: e(0.22), stickers: e(0.42), me: e(0.55) }); };
+const endAt = (t) => { const e = (d) => (t - (TEND - 0.24) - d) / 0.32; return A.endCard(FACE.end, { logo: e(0.0), board: e(0.22), stickers: e(0.42), me: e(0.55) }); };
 // a page flips up and away (u 0..1) / drops in from above (u 0..1)
 const flipUp = (html, u) => `<div class="layer" style="transform-origin:540px 0;transform:translateY(${(-2000 * easeIn(u)).toFixed(1)}px) rotate(${(-5 * easeIn(u)).toFixed(2)}deg);box-shadow:0 30px 60px rgba(0,0,0,.35)">${html}</div>`;
 const dropIn = (html, u) => { const y = u >= 1 ? 0 : -1950 * (1 - backOut(u, 1.2)); return `<div class="layer" style="transform:translateY(${y.toFixed(1)}px) rotate(${(3 * (1 - easeOut(u))).toFixed(2)}deg);box-shadow:0 30px 60px rgba(0,0,0,.35)">${html}</div>`; };
@@ -151,7 +151,7 @@ export async function frame(t) {
   const T = (s) => O(s);
   let g;
   if (t >= TEND) g = endAt(t);
-  else if (t >= T(WIPE5[0])) { const w = A.steamParts(inOut((t - T(WIPE5[0])) / (T(WIPE5[1]) - T(WIPE5[0])))); g = base() + captionAt(t) + `<div class="layer" style="clip-path:path('${w.clip}')">${endAt(TEND)}</div>${w.lines}${w.cup}`; }
+  else if (t >= T(WIPE5[0])) { const w = A.steamParts(inOut((t - T(WIPE5[0])) / (T(WIPE5[1]) - T(WIPE5[0])))); g = base() + captionAt(t) + `<div class="layer" style="clip-path:path('${w.clip}')">${endAt(t)}</div>${w.lines}${w.cup}`; }
   else if (t >= T(FLIP4) && t < T(FLIP4) + FLIPD) g = base() + flipUp(loyalPage(src), (t - T(FLIP4)) / FLIPD) + captionAt(t);
   else if (t >= T(DROP4[1]) && t < T(FLIP4)) g = loyalPage(src) + captionAt(t);
   else if (t >= T(DROP4[0]) && t < T(DROP4[1])) g = base() + dropIn(loyalPage(29.4), (t - T(DROP4[0])) / (T(DROP4[1]) - T(DROP4[0])));
