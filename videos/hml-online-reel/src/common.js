@@ -61,3 +61,8 @@ export const coffeeRing = ({ x, y, r = 70, o = 0.3, seed = 3 } = {}) => `
     <g filter="url(#ring${seed})" fill="none" stroke="#7a4a26" opacity="${o}">
       <circle cx="${r + 20}" cy="${r + 20}" r="${r}" stroke-width="7"/>
       <path d="M${r + 20 - r * 0.92} ${r + 20 + r * 0.25} A${r * 0.95} ${r * 0.95} 0 0 1 ${r + 20 + r * 0.6} ${r + 20 - r * 0.72}" stroke-width="3"/></g></svg>`;
+
+// the cut list (source seconds): the five takes without his walks in and out of frame, then a 2 s end card
+export const KEEP = [[0.72, 5.45], [6.92, 14.75], [16.18, 22.45], [23.25, 28.25], [29.40, 38.10]];
+export const END = 2.0;
+export const O = (src) => { let o = 0; for (const [a, b] of KEEP) { if (src <= b) return o + Math.max(0, src - a); o += b - a; } return o; };
