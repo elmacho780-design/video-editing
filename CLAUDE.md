@@ -44,6 +44,7 @@ Read **`videos/_handoff/HML_ACADEMY_CONTEXT.md`** (Batu's own brief: classes, ol
 | `videos/reference-edits/` | Frame-by-frame study of 3 reference Reels (captions, cards, transitions, timings) | `REFERENCE.md`, `tools/strip.py` |
 | `videos/hml-olympiad-reel/` | **Olympiad talking-head edit** (basketball hook → teacher on camera, captions, cards, comic shout, 3+1 offer, end card). Final: `renders/hml-olympiad-reel.mp4`; "ending first" cut (no hook, no banner, opens on the shout): `renders/hml-olympiad-reel-ending-first.mp4` | "HML notebook" look: paper, stickers, washi tape, stamps, sticker captions; HTML/CSS rendered per frame; Whisper word-timed captions |
 | `videos/hml-online-reel/` | **Online course ad** (presenter on camera: coffee-price hook, why online, olympiad or level, schedule Tue/Thu/Sat 17:00, 3+1 offer, contact, end card). Final: `renders/hml-online-reel.mp4` | Look A "HML notebook, coffee edition" (chosen from 3 looks, `stills/board_0.jpg`): kraft cups, coffee rings, 3+1 as a café loyalty card, the steam-to-tree wipe; full-screen pages cover his walk-ins; original café score (nylon guitar, upright piano). See its `README.md` |
+| `videos/hml-holiday-reel/` | **Holiday-class ad** (11/2-11/8, daily 15:00; one seated take). Final: `renders/hml-holiday-reel.mp4` | "Level Up" video-game look (chosen from 5 looks, `stills/board_0.jpg`): HUD, RPG dialogue captions, quest, level map, LEVEL UP, boss, CONTINUE?; Press Start 2P; cuts snapped to a 150 BPM grid; original chip-synth game score (`audio/chip.py`) with real drums. See its `README.md` |
 
 **Reusable parts worth stealing:**
 - **`hml-olympiad-reel/src/ui.js` + `theme.css`:** sticker captions, notebook cards, the bloom-wipe transition from the HML tree, split-flap numbers, confetti, comic shout, end card.
@@ -100,4 +101,5 @@ Batu wants to try more looks (paper-cut, hand-painted and others). The Lemo-Opus
 - **Safe zones (1080×1920):**
   - keep the top ~220 px, the bottom ~380 px and the right ~140 px clear of key text
   - keep graphics off the face, especially the eyes
+- **Fonts and Mongolian:** Unbounded and Pixelify Sans have no Ү ү Ө ө (the browser substitutes a serif). Use Montserrat, Manrope, Caveat or Press Start 2P for any text with those letters, or give Unbounded a Montserrat fallback.
 - **Commit to `claude/openstoryline-install-use-mj0u13`.** Large raw footage stays out of git (`src/*.mov`, `src/*.mp4` are ignored per project). Never commit third-party reference videos or art.
