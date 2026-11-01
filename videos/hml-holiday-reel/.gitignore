@@ -1,0 +1,8 @@
+src/*.mov
+src/*.mp4
+frames/
+sheets/
+audio/*.wav
+audio/out/
+out/
+stills/src/
