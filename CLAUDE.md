@@ -24,6 +24,10 @@ Read **`videos/_handoff/HML_ACADEMY_CONTEXT.md`** (Batu's own brief: classes, ol
   - Mongolian text Claude writes is flagged for Batu to check.
   - Mongolian subtitles sit high or mid-frame, clear of the Reels UI. Nothing important goes in the bottom ~20% or the right-hand button column.
 
+## 1b. The HML Daily English series (30 days)
+
+Batu's 30-day plan for the Daily English page (animated lessons and quizzes, filmed trust and sales videos) is in **`videos/_handoff/DAILY_ENGLISH_SERIES.md`**: the day-by-day topics, how each video is made, and the series style-sheet items adopted from his spreadsheet. They add to these rules; where they disagree, this file wins.
+
 ## 2. How Batu likes to work (learned the hard way)
 
 1. **Quality bar is high.** "High quality", "wow". Research references on the web first, then make style frames. Never ship a first pass.
