@@ -32,6 +32,7 @@ Not adopted from the sheet:
 | Text placement (animations) | Key text in the middle third of the screen. Filmed videos keep `CLAUDE.md`'s rule (off the face) |
 | Keyword colour | English keywords in a different colour from the Mongolian text |
 | Minimum read time | Each example stays on screen at least 2 seconds |
+| Pacing (animations) | From Batu's feedback on Day 1's first preview ("too slow, people will scroll away"): about 15 to 20 s in total. The hook is on screen from the first frame and pays off within the first second; something new happens roughly every 2 s; no scene only holds. Short VO lines, said back to back |
 | Sound effects | A pop only on reveals and answers; a tick for countdowns; no effects on trust videos. Effects are soft and musical (real samples or tuned notes), never noise whooshes |
 | End card | The series name plus a follow CTA (@hml_english) |
 | Colours, logo, safe zones, music, voice | As in `CLAUDE.md` |
@@ -78,4 +79,4 @@ Totals: 18 animate, 8 film, 4 either.
 ## Progress
 
 - **Series look approved: paper-cut** (`videos/daily-01-i-agree/src/paper.js`), with its music theme (`videos/daily-01-i-agree/audio/score.py`). Reuse both for every animated day.
-- **Day 1** (`videos/daily-01-i-agree/`): a preview rendered on the script's timing (music only). Waiting for Batu's Mongolian check and his voiceover recording; then everything is re-timed to his words (see that folder's README).
+- **Day 1** (`videos/daily-01-i-agree/`): preview version 2 (re-paced to 17.3 s after "too slow" feedback on the 27.5 s version 1), music only. Waiting for Batu's Mongolian check and his voiceover recording; then everything is re-timed to his words (see that folder's README).

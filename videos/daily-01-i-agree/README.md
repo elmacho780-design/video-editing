@@ -11,17 +11,18 @@ The first video of the 30-day series (`videos/_handoff/DAILY_ENGLISH_SERIES.md`)
   - the subtitle line (English in orange) and the end card (logo, series name, @hml_english)
 - `src/day.js` (`?view=day`): Day 1's timeline.
 - `audio/score.py`: **the "Stop Saying This" series theme**:
-  - original, G major at 120 BPM, on real CC0 samples only: ukulele, pizzicato bass, glockenspiel, marimba, kalimba, harp, chimes, shaker, claps
+  - original, G major at 128 BPM, on real CC0 samples only: ukulele, pizzicato bass, glockenspiel, marimba, kalimba, harp, chimes, shaker, claps
   - a harp lift on each scene change
   - pops only on reveals and answers, on their own layer above the music
 
 ## Status
 
-**Preview:** `renders/daily-01-i-agree.mp4`, timed to the script on a 120 BPM grid, music only, no voice yet.
+**Preview (version 2, re-paced):** `renders/daily-01-i-agree.mp4`, 17.3 s, timed to the script on a 128 BPM grid, music only, no voice yet.
+Version 1 was 27.5 s and got the feedback "too slow"; see `SCRIPT.md` for what changed.
 
 **When Batu's voiceover arrives:**
 1. Run Whisper word timings on it (as `hml-online-reel/tools/align.py`).
-2. Move each scene start and pop in `src/day.js` onto his words. `S`, `SUBS`, `PAIRS`, `AM_CUT` and the pop times hold all the timing.
+2. Move each scene start and pop in `src/day.js` onto his words. The tables `T` (scene and pop times), `PT` (moves inside each pair) and `SUBS` hold all the timing.
 3. Write `audio/voice.py` (his voice untouched, `pan=mono|c0=c0`).
 4. Re-run `audio/score.py`. It ducks the music under the voice when `audio/out/voice.wav` exists.
 5. Run `audio/final.py`, render and mux.
