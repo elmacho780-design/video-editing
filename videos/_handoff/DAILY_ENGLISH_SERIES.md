@@ -77,4 +77,5 @@ Totals: 18 animate, 8 film, 4 either.
 
 ## Progress
 
-- **Day 1** (`videos/daily-01-i-agree/`): script (`SCRIPT.md`) and three candidate series looks (`stills/board_0.jpg`) sent to Batu for approval. Next: he picks the look, checks the Mongolian and records the voiceover.
+- **Series look approved: paper-cut** (`videos/daily-01-i-agree/src/paper.js`), with its music theme (`videos/daily-01-i-agree/audio/score.py`). Reuse both for every animated day.
+- **Day 1** (`videos/daily-01-i-agree/`): a preview rendered on the script's timing (music only). Waiting for Batu's Mongolian check and his voiceover recording; then everything is re-timed to his words (see that folder's README).
