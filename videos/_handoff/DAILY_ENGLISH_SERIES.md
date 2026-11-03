@@ -77,4 +77,4 @@ Totals: 18 animate, 8 film, 4 either.
 
 ## Progress
 
-- **Day 1** (`videos/daily-01-i-agree/`): script and style frames in progress.
+- **Day 1** (`videos/daily-01-i-agree/`): script (`SCRIPT.md`) and three candidate series looks (`stills/board_0.jpg`) sent to Batu for approval. Next: he picks the look, checks the Mongolian and records the voiceover.

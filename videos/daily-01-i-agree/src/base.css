@@ -1,0 +1,5 @@
+/* Daily English Day 1: shared page basics. Each candidate look adds its own styles (src/cut.js, pen.js, type.js). */
+html, body { margin: 0; background: #000; overflow: hidden; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Manrope, sans-serif; }
+.abs { position: absolute; }
+.layer { position: absolute; inset: 0; }
