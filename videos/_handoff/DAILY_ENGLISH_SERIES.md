@@ -80,3 +80,5 @@ Totals: 18 animate, 8 film, 4 either.
 
 - **Series look approved: paper-cut** (`videos/daily-01-i-agree/src/paper.js`), with its music theme (`videos/daily-01-i-agree/audio/score.py`). Reuse both for every animated day.
 - **Day 1** (`videos/daily-01-i-agree/`): preview version 2 (re-paced to 17.3 s after "too slow" feedback on the 27.5 s version 1), music only. Waiting for Batu's Mongolian check and his voiceover recording; then everything is re-timed to his words (see that folder's README).
+- **"One Word, Three Levels" format** (Days 2, 9, 16, 23): `videos/daily-02-tired/src/levels.js` holds the paper staircase (hook and recap) and the level cards that slide in. Its music theme is `videos/daily-02-tired/audio/score.py`: the same family as the "Stop Saying This" theme, with the same end-card landing.
+- **Day 2** (`videos/daily-02-tired/`): preview rendered (17.3 s, music only). Waiting for Batu's script and Mongolian check and his voiceover.
