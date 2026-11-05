@@ -1,0 +1,5 @@
+/* Daily English: shared page basics. The paper-cut look adds its styles from src/paper.js. */
+html, body { margin: 0; background: #000; overflow: hidden; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Manrope, sans-serif; }
+.abs { position: absolute; }
+.layer { position: absolute; inset: 0; }
