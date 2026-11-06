@@ -76,6 +76,10 @@ Batu's sheet recommends animating teaching and quiz videos and filming trust and
 
 Totals: 18 animate, 8 film, 4 either.
 
+## The plan for each day
+
+`DAILY_PLAN.md`: the hook, beats and format for all 30 days, and the shoot list for the filmed days. Batu's editable copy is the doc "HML Daily English: 30-day plan" (https://claude.ai/artifact/N9KHLgTDqg9ucmtcAusxoT); if he has edited it, his doc wins.
+
 ## Progress
 
 - **Series look approved: paper-cut** (`videos/daily-01-i-agree/src/paper.js`), with its music theme (`videos/daily-01-i-agree/audio/score.py`). Reuse both for every animated day.
