@@ -60,16 +60,20 @@ function hook(t) {          // "2 - 3 САРЫН ДОТОР / АНГЛИАР У�
     + A.plank({ text: 'САРЫН<br>ДОТОР', x: 520, y: 262, fs: 56, r: -2, dir: 1, u: U(t, C.hookP1, 0.35), out: o - 0.12 })
     + A.plank({ text: 'АНГЛИАР УНШИНА', x: 150, y: 448, cls: 'navy', r: 1.5, u: U(t, C.hookP2, 0.35), out: o - 0.18 });
 }
+// a bold white arrow that draws itself from left to right (the year becomes a month)
+const arrow = (t, o) => { const u = U(t, C.b1arr, 0.25); if (u <= 0 || o >= 1) return '';
+  return `<svg class="abs" style="left:462px;top:330px;overflow:visible;transform:translateY(${(-900 * easeIn(o)).toFixed(1)}px);filter:drop-shadow(0 6px 0 #0a1636) drop-shadow(0 10px 12px rgba(10,20,50,.4))" width="74" height="70" viewBox="0 0 74 70">
+    <path d="M6 35 H58 M38 12 L62 35 L38 58" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${(1 - easeOut(u)).toFixed(3)}"/></svg>`; };
 function books1(t) {        // a year's book in one month: [1][ЖИЛ] → [1][САР] ✓
   if (t < C.b1 - 0.1 || t > C.b1Out + 0.6) return '';
   const o = O(t, C.b1Out);
   return A.tag({ text: 'ОЛОН УЛСЫН ХӨТӨЛБӨР', y: 230, u: U(t, C.b1, 0.25), out: o })
-    + A.block({ ch: '1', x: 120, y: 304, s: 128, pal: 'amber', r: -5, fs: 86, u: U(t, C.b1j), out: o })
-    + A.plank({ text: 'ЖИЛ', x: 262, y: 322, fs: 52, r: 1, u: U(t, C.b1j + 0.12, 0.35), out: o - 0.05 })
-    + (t >= C.b1arr && o < 1 ? `<div class="abs" style="left:440px;top:318px;font:900 80px/1 Montserrat;color:#fff;text-shadow:0 6px 0 #0a1636;opacity:${(clamp(U(t, C.b1arr, 0.2)) * (1 - easeIn(o))).toFixed(3)};transform:translate(${(-40 * (1 - easeOut(U(t, C.b1arr, 0.25)))).toFixed(1)}px,${(-900 * easeIn(o)).toFixed(1)}px)">→</div>` : '')
-    + A.block({ ch: '1', x: 530, y: 304, s: 128, pal: 'orange', r: 6, fs: 86, u: U(t, C.b1s), out: o - 0.08 })
-    + A.plank({ text: 'САР', x: 672, y: 322, fs: 52, cls: 'navy', r: -1.5, u: U(t, C.b1s + 0.12, 0.35), out: o - 0.1 })
-    + A.tick({ x: 832, y: 316, s: 104, u: U(t, C.b1tick, 0.35), out: o - 0.15 });
+    + A.block({ ch: '1', x: 120, y: 306, s: 120, pal: 'amber', r: -5, fs: 82, u: U(t, C.b1j), out: o })
+    + A.plank({ text: 'ЖИЛ', x: 252, y: 320, fs: 52, r: 1, u: U(t, C.b1j + 0.12, 0.35), out: o - 0.05 })
+    + arrow(t, o)
+    + A.block({ ch: '1', x: 546, y: 306, s: 120, pal: 'orange', r: 6, fs: 82, u: U(t, C.b1s), out: o - 0.08 })
+    + A.plank({ text: 'САР', x: 680, y: 320, fs: 52, cls: 'navy', r: -1.5, u: U(t, C.b1s + 0.12, 0.35), out: o - 0.1 })
+    + A.tick({ x: 832, y: 270, s: 78, u: U(t, C.b1tick, 0.35), out: o - 0.15 });
 }
 function books2(t) {        // in month two, the grade 2 programme ✓ ... "how does that sound?"
   if (t < C.b2 - 0.1 || t > C.b2Out + 0.6) return '';

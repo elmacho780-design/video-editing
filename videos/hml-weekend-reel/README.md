@@ -5,7 +5,26 @@ An ad for the new weekend classes:
 - starting 14 and 15 November (Saturday and Sunday)
 - classes at 11:30 and 13:00
 
-The teacher talks to camera in one take with two camera set-ups (32.6 s). Status: **style frames sent; waiting for Batu to choose a look** (`stills/board_0.jpg`).
+The teacher talks to camera in one take with two camera set-ups (32.6 s).
+
+**Final:** `renders/hml-weekend-reel.mp4` (9:16, 35.0 s, 30 fps, H.264 at about 21 Mbps, BT.709, -14 LUFS). It uses Look A, "ABC blocks", which Batu chose from `stills/board_0.jpg`.
+
+## Quality first (Batu's main feedback on earlier edits: "quality worsens after editing, glitches")
+
+The footage never passes through the browser:
+1. `tools/overlay.mjs` renders only the graphics, as PNG screenshots with a transparent background, stored losslessly (FFV1 BGRA) in `out/overlay.mkv`.
+2. `tools/composite.sh` lays that over the original camera file, flipped back and frame for frame, in **one** x264 encode:
+   - CRF 12, High profile, constant 30 fps
+   - the graphics converted with the same BT.709 limited-range matrix as the footage
+   - tagged BT.709 like the source
+3. **No cuts and no punch-ins:** the take plays exactly as filmed, so there are no jump cuts. The camera change is covered by a full-screen wall of blocks.
+4. `tools/fidelity.py` checks the result against the camera file:
+   - PSNR on every untouched pixel: mean 47.8 dB, minimum 45.1 dB (visually lossless)
+   - colour shift: about 0.05 of a level
+   - 0 misplaced or frozen frames
+   - audio sync: 0 ms
+
+   A simulation of the old pipeline on the same frames scored 42.8 dB. That simulation omits the old browser JPEG screenshot and its colour-matrix shift, so the real old loss was worse.
 
 ## The footage
 
@@ -39,7 +58,35 @@ Similarity to Batu's transcript is 0.94 to 1.00 per sentence. The Cyrillic is Cl
 8. **26 to 31 s:** the phone numbers (9930 4451, 8888 3351), staying on to the end.
 9. **31 to 33 s:** "За, амжилт хүсье" into the end card (logo, numbers, @hml_english).
 
-Pauses are trimmed, which gives about 31 s. The music is original and written to the picture, with hits on the cuts.
+(Planned with trimmed pauses; the final keeps the take uncut, for quality.)
+
+## The edit (`src/edit.js`, `src/blocks.js`)
+
+- **0 s:** "2 - 3 САРЫН ДОТОР / АНГЛИАР УНШИНА" in toy blocks and planks, in place on frame one.
+- **4 s:** "ОЛОН УЛСЫН ХӨТӨЛБӨР: 1 ЖИЛ → 1 САР ✓" as she shows Oxford Discover 1.
+- **8 s:** "2 ДАХЬ САРД: 2-Р АНГИЙН ХӨТӨЛБӨР ✓" with book 2, then a "?" block on "ямар сонсогдож байна?".
+- **12.45 s:** a wall of alphabet blocks with "ШИНЭЭР ЭЛСЭЛТ" covers the camera change at 12.93 s and falls away as she faces the camera again.
+- **13.5 s:** "ШИНЭЭР ЭЛСЭЛТ", "АМРАЛТЫН ӨДРҮҮДЭД", "ABC анги", "Түвшин ахиулах".
+- **19.7 s:** start days 11/14 Бямба and 11/15 Ням, then the times 11:30 and 13:00, as blocks over her sweater.
+- **26 s:** "БҮРТГҮҮЛЭЭРЭЙ" with 9930 4451 and 8888 3351.
+- **32.5 s:** the end card: logo, ШИНЭЭР ЭЛСЭЛТ, dates, times, ABC, both numbers, @hml_english.
+
+Graphics above her face leave upwards; those below fall down, so nothing crosses her face. Word-timed captions carry every word she says. They sit on her sweater, and at the top while she holds the books.
+
+**Audio:**
+- `audio/voice.py`: her voice untouched (one channel; both are identical), resampled once to 48 kHz.
+- `audio/score.py`: a toy-box score in C at 120 BPM (marimba, xylophone, glockenspiel, pizzicato, woodblock) with hits on the block cues. It ducks under her voice.
+- `audio/final.py`: -14 LUFS.
+
+## Rebuild (from the project folder)
+
+```sh
+node $LIB/core/render/events.mjs "$PWD" --q 'view=edit' --size 1080x1920 --out "$PWD/edit/events.json"
+$LIB/.venv/bin/python audio/voice.py && $LIB/.venv/bin/python audio/score.py && $LIB/.venv/bin/python audio/final.py
+node tools/overlay.mjs "$PWD" --fps 30 --workers 5 --q 'view=edit'
+sh tools/composite.sh
+$LIB/.venv/bin/python tools/fidelity.py
+```
 
 ## Files
 

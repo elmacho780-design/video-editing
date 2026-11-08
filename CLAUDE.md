@@ -49,6 +49,7 @@ Batu's 30-day plan for the Daily English page (animated lessons and quizzes, fil
 | `videos/hml-olympiad-reel/` | **Olympiad talking-head edit** (basketball hook → teacher on camera, captions, cards, comic shout, 3+1 offer, end card). Final: `renders/hml-olympiad-reel.mp4`; "ending first" cut (no hook, no banner, opens on the shout): `renders/hml-olympiad-reel-ending-first.mp4` | "HML notebook" look: paper, stickers, washi tape, stamps, sticker captions; HTML/CSS rendered per frame; Whisper word-timed captions |
 | `videos/hml-online-reel/` | **Online course ad** (presenter on camera: coffee-price hook, why online, olympiad or level, schedule Tue/Thu/Sat 17:00, 3+1 offer, contact, end card). Final: `renders/hml-online-reel.mp4` | Look A "HML notebook, coffee edition" (chosen from 3 looks, `stills/board_0.jpg`): kraft cups, coffee rings, 3+1 as a café loyalty card, the steam-to-tree wipe; full-screen pages cover his walk-ins; original café score (nylon guitar, upright piano). See its `README.md` |
 | `videos/hml-holiday-reel/` | **Holiday-class ad** (11/2-11/8, daily 15:00; one seated take). Final: `renders/hml-holiday-reel.mp4` | "Level Up" video-game look (chosen from 5 looks, `stills/board_0.jpg`): HUD, RPG dialogue captions, quest, level map, LEVEL UP, boss, CONTINUE?; Press Start 2P; cuts snapped to a 150 BPM grid; original chip-synth game score (`audio/chip.py`) with real drums. See its `README.md` |
+| `videos/hml-weekend-reel/` | **Weekend ABC and level-up classes ad** (one take, two set-ups; classes from 11/14-15, 11:30 and 13:00). Final: `renders/hml-weekend-reel.mp4` | Look A "ABC blocks" (chosen from 3, `stills/board_0.jpg`): wooden toy blocks and planks, a block wall over the camera change; toy-box score. **The lossless graphics-layer pipeline** (see section 6) |
 
 **Reusable parts worth stealing:**
 - **`hml-olympiad-reel/src/ui.js` + `theme.css`:** sticker captions, notebook cards, the bloom-wipe transition from the HML tree, split-flap numbers, confetti, comic shout, end card.
@@ -96,6 +97,10 @@ Batu wants to try more looks (paper-cut, hand-painted and others). The Lemo-Opus
 
 ## 6. Hard-won technical notes
 
+- **Footage quality (Batu's top complaint: "quality worsens after editing, glitches"):** never send footage through the browser.
+  - Render only the graphics, losslessly with alpha, and composite them over the original camera file in ffmpeg in ONE encode: x264 CRF 12, BT.709 matrix for the graphics, BT.709 tags.
+  - Avoid jump cuts and punch-ins; cover any unavoidable cut with a full-screen graphic.
+  - Check with PSNR against the source. Template: `videos/hml-weekend-reel/tools/` (`overlay.mjs`, `composite.sh`, `fidelity.py`).
 - **Phone audio:** iPhone footage is dual-mono. Never fold to mono with `-ac 1` (it sums L+R, +3 dB, and clips). Use `pan=mono|c0=c0`.
 - **Loudness:** Instagram wants -14 LUFS. Use one linear gain plus a look-ahead limiter. Avoid ffmpeg `loudnorm` in dynamic mode on voice.
 - **Captions:** align words with faster-whisper `large-v3` (`language='mn'`), passing the transcript as `initial_prompt` per sentence chunk. Compare against what is actually said and flag any differences to Batu.
