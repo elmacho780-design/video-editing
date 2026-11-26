@@ -3,7 +3,7 @@
 The teacher ranks ways to learn English outside class. It ends with HML's Saturday and Sunday kids' classes and the phone numbers.
 Edited in the grammar of Batu's reference video (a split-screen tier list), in our ABC-blocks look.
 
-**Final:** `renders/hml-tierlist-reel.mp4`:
+**Final:** `renders/hml-tierlist-reel.mp4` (about 120 MB, over GitHub's 100 MB limit, so **not in git**; rebuild it with the commands below, or use the copy sent to Batu):
 - 9:16 1080x1920, 100.4 s (the whole take, uncut), 30 fps
 - H.264 CRF 12, BT.709
 - AAC 320k at 44.1 kHz
@@ -43,6 +43,14 @@ The pipeline is the same as the weekend and linking-words Reels:
 - `tools/fidelity.py`: the top window against the source window, the frame order and the audio sync
 
 Her voice is the take's own track, untouched. The original already peaks at +1.2 dBFS, and that is kept as recorded.
+
+Results:
+- **Picture:** the top window against the source averages 48.2 dB PSNR (minimum 45.2).
+- **Frames:** none misplaced or frozen.
+- **Sound:** in sync to the sample. Her voice matches the original track to 42 dB (only the AAC 320k encode), with a level change of 0.00 dB.
+- **Loudness:** -16.1 LUFS, the same as the original.
+
+**Two cuts are already in the camera file** (the framing jumps at 78.0 s and 88.47 s; `tools/fidelity.py` and a frame-difference scan found them). Each is covered by a quick wall of ABC blocks over the top half (`WALLS` in `src/edit.js`); the second one carries "ЭЛСЭЛТ".
 
 ## For Batu to check
 
