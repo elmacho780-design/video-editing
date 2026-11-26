@@ -3,7 +3,7 @@
 The music: a quiet bed of grand piano (Salamander) and a very low string pad, original, on real CC0 samples only (no synthesised sound,
 no noise, no drums). F major, 80 BPM (a bar = 3 s), an eight-bar progression that keeps turning under her voice:
   Fmaj7 · Am7 · Bbmaj7 · C · Dm7 · Am7 · Bbmaj7 · Csus4-C
-Written to the board: a gentle kalimba note as each method's card appears, and a soft tuned landing as it drops into its tier:
+Written to the board: a gentle kalimba note as each method's card appears (and a soft run on the two block walls), and a soft tuned landing as it drops into its tier:
 S rises (a bright glockenspiel arpeggio), B is a calm marimba third, C falls softly. It sits at one constant level, about 22 dB under
 her speech (no ducking, nothing pumps), resolves to F on "За, амжилт хүсье" and fades with the picture.
 
@@ -45,6 +45,8 @@ CARD = {'duo': 'C5', 'game': 'D5', 'song': 'E5', 'gt': 'F5', 'toon': 'G5', 'word
 for e in EV:
     t = e['t']
     if e['type'] == 'card': n(t, 'kalimba', CARD[e['id']], 1.2, 0.2, 0.25)
+    elif e['type'] == 'wall':                                         # the block wall: a soft kalimba run up
+        for i, p in enumerate(['C5', 'E5', 'G5', 'A5', 'C6']): n(t + 0.035 * i, 'kalimba', p, 0.9, 0.16, -0.2 + 0.1 * i)
     elif e['type'] == 'tier':
         if e['tier'] == 'S':
             for i, p in enumerate(['F5', 'A5', 'C6', 'F6']): n(t + 0.06 * i, 'glockenspiel', p, 1.0, 0.18, 0.2)

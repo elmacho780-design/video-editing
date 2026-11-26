@@ -82,10 +82,29 @@ function banners(t) {
   let g = '';
   const h = (t + 0.4) / 0.35, ho = (t - 7.9) / 0.3;                  // the hook, in place on frame one
   if (ho < 1) g += L.banner('Аль нь *үр дүнтэй*,<br>аль нь *цагийн гарз* вэ?', 676, `transform:scale(${(0.7 + 0.3 * backOut(h, 2)).toFixed(3)}) translateY(${(-80 * easeOut(clamp(ho)) ** 2).toFixed(1)}px);opacity:${(clamp(h * 4) * (1 - clamp(ho))).toFixed(3)}`);
-  const ENROL = 88.22, PHONE = 92.6;
+  const ENROL = 88.62, PHONE = 92.6;                                   // the enrolment banner pops as the wall clears
   if (t >= ENROL && t < PHONE) { const u = (t - ENROL) / 0.35; g += L.banner('Хагас сайн, бүтэн сайнд<br>*хүүхдийн анги · ЭЛСЭЛТ*', 690, `transform:scale(${(0.7 + 0.3 * backOut(u, 2)).toFixed(3)});opacity:${clamp(u * 4).toFixed(3)}`); }
   if (t >= PHONE) { const u = (t - PHONE) / 0.35; g += L.banner('*9930 4451* · *8888 3351*', 752, `font-size:58px;transform:scale(${(0.7 + 0.3 * backOut(u, 2)).toFixed(3)});opacity:${clamp(u * 4).toFixed(3)}`); }
   return g;
+}
+// a quick wall of alphabet blocks over the top half: it hides the two cuts that are already in the camera file (the framing
+// jumps at 78.0 s and 88.47 s), so they read as transitions instead of glitches
+export const WALLS = [{ at: 77.72, out: 78.14, text: null }, { at: 88.2, out: 88.62, text: 'ЭЛСЭЛТ' }];
+const LET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', PALS = [['#ffb02e', '#c47a14'], ['#ff7a3d', '#b8420f'], ['#f6eedc', '#cdbb94'], ['#1d3a78', '#0a1636']];
+function wall(t, { at, out, text }) {
+  if (t < at || t > out + 0.4) return '';
+  const back = clamp((t - at - 0.12) / 0.08) * (1 - clamp((t - out) / 0.12));
+  let g = `<div style="position:absolute;left:0;top:0;width:1080px;height:960px;overflow:hidden">` + (back > 0 ? `<div class="layer" style="background:#14295a;opacity:${back.toFixed(3)}"></div>` : '');
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 6; c++) {
+    const k = r * 6 + c, u = (t - (at + (4 - r) * 0.02 + c * 0.006)) / 0.14, x = (t - (out + r * 0.02 + c * 0.006)) / 0.2;
+    if (u <= 0 || x >= 1) continue;
+    const [bg, sd] = PALS[(r * 7 + c * 3) % 4], sc = (0.4 + 0.6 * backOut(u, 1.8)) * (1 - 0.5 * clamp(x));
+    g += `<div style="position:absolute;left:${c * 180 + 5}px;top:${r * 192 + 5}px;width:170px;height:182px;border-radius:18px;background:${bg};color:${bg === '#1d3a78' ? '#ffb02e' : '#14295a'};
+      font:900 84px/182px Montserrat;text-align:center;box-shadow:inset 0 6px 0 rgba(255,255,255,.4),0 10px 0 ${sd};transform:scale(${sc.toFixed(3)}) rotate(${((k * 37) % 9) - 4}deg);opacity:${(clamp(u * 6) * (1 - clamp(x))).toFixed(3)}">${LET[(k * 5) % 26]}</div>`;
+  }
+  if (text) { const u = (t - at - 0.1) / 0.18, x = (t - out) / 0.2;
+    g += L.banner(`*${text}*`, 400, `font-size:84px;z-index:5;transform:scale(${(0.5 + 0.5 * backOut(u, 2)).toFixed(3)});opacity:${(clamp(u * 5) * (1 - clamp(x))).toFixed(3)}`); }
+  return g + '</div>';
 }
 function caption(t) {
   for (let i = CAPS.length - 1; i >= 0; i--) {
@@ -100,7 +119,8 @@ function caption(t) {
 export const EV = () => {                                             // cues for the score (built once the captions are loaded)
   const ev = [{ t: 0, type: 'clock' }];
   for (const it of ITEMS) { const T = TIME(it.id); if (T) ev.push({ t: +T.at.toFixed(3), type: 'card', id: it.id }, { t: +T.stamp.toFixed(3), type: 'tier', id: it.id, tier: it.tier }); }
-  ev.push({ t: 88.22, type: 'enrol' }, { t: 92.6, type: 'phone' });
+  ev.push({ t: 88.62, type: 'enrol' }, { t: 92.6, type: 'phone' });
+  for (const w of WALLS) ev.push({ t: w.at, type: 'wall' });
   return ev.sort((a, b) => a.t - b.t);
 };
 
@@ -121,7 +141,7 @@ export async function frame(t) {
   g += tray(t);
   for (const it of ITEMS) g += cardAndFlight(t, it.id);
   for (const it of ITEMS) g += stamp(t, it.id);
-  g += banners(t) + caption(t);
+  g += banners(t) + caption(t) + WALLS.map((w) => wall(t, w)).join('');
   st.innerHTML = g;
   await Promise.all([...st.querySelectorAll('img')].map((x) => x.decode().catch(() => {})));
 }
