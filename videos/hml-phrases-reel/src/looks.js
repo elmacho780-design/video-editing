@@ -56,7 +56,7 @@ const C = {
   .bk-en.navy { background: linear-gradient(#1d3a78, #14295a); box-shadow: inset 0 5px 0 rgba(255,255,255,.18), 0 9px 0 #0a1636; }
   .bk-mn { display: inline-block; margin: 6px 0 0 30px; padding: 7px 18px 10px; border-radius: 12px; background: linear-gradient(#fffaf0, #f6eedc); color: #14295a; font: 800 32px/1 Manrope;
     box-shadow: inset 0 4px 0 rgba(255,255,255,.6), 0 7px 0 #cdbb94; white-space: nowrap; }
-  .bk-num { position: absolute; left: -18px; top: -14px; width: 62px; height: 62px; border-radius: 12px; background: #ffb02e; color: #14295a; font: 900 38px/62px Montserrat; text-align: center;
+  .bk-num { position: absolute; z-index: 2; left: -18px; top: -14px; width: 62px; height: 62px; border-radius: 12px; background: #ffb02e; color: #14295a; font: 900 38px/62px Montserrat; text-align: center;
     box-shadow: inset 0 4px 0 rgba(255,255,255,.45), 0 7px 0 #c47a14; transform: rotate(-8deg); }
   .bk-tag { position: absolute; padding: 10px 22px 12px; border-radius: 12px; background: #14295a; color: #ffb02e; font: 900 38px/1 Montserrat; letter-spacing: 2px; white-space: nowrap;
     box-shadow: 0 8px 0 #0a1636, 0 14px 18px rgba(10,20,50,.4); }`,
