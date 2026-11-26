@@ -15,7 +15,8 @@ const easeInOut = (u) => { u = clamp(u); return u < 0.5 ? 4 * u ** 3 : 1 - (-2 *
 const backOut = (u, k = 1.6) => { u = clamp(u); return 1 + (k + 1) * (u - 1) ** 3 + k * (u - 1) ** 2; };
 const kw = (s) => s.replace(/\*([^*]+)\*/g, '<b>$1</b>');
 
-export const TITLE = 'АНГЛИ ХЭЛ СУРАХ ХИЧЭЭЛЭЭС ГАДНАХ АРГУУД';
+export const TITLE = 'АНГЛИ ХЭЛ СУРАХ ХИЧЭЭЛЭЭС ГАДНАХ АРГУУД · TIER LIST';                  // Batu's title
+const TITLE_HTML = 'АНГЛИ ХЭЛ СУРАХ ХИЧЭЭЛЭЭС<br>ГАДНАХ АРГУУД · <i>TIER LIST</i>';
 // the pictures: Batu's images (assets/ext/, not in git), our own drawing for memorising words, our logo for the class
 const PIC = {
   duo: ['assets/ext/duo.webp', 'contain', '#fff'], game: ['assets/ext/game.jpg', 'cover', '#000'], song: ['assets/ext/song.jpg', 'cover 38% 50%', '#000'],
@@ -45,13 +46,18 @@ const css = `
 .A-card .nm { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font: 900 60px/1 Montserrat; color: #14295a; white-space: nowrap; letter-spacing: -.5px; }
 .A-q { position: absolute; left: 110px; top: 226px; padding: 10px 20px 12px; border-radius: 12px; background: #14295a; color: #ffb02e; font: 900 32px/1 Montserrat; letter-spacing: 1px;
   box-shadow: 0 8px 0 #0a1636; transform: rotate(-4deg); }
-.A-title { top: 968px !important; font-size: 30px !important; }
+.A-title { top: 966px !important; font-size: 30px !important; line-height: 1.18 !important; white-space: normal !important; }
+.A-title i { font-style: normal; color: #14295a; }
 .A-tl { position: absolute; padding: 10px 20px 12px; border-radius: 12px; background: #14295a; color: #ffb02e; font: 900 34px/1 Montserrat; letter-spacing: 3px; box-shadow: 0 8px 0 #0a1636, 0 14px 18px rgba(0,0,0,.4); white-space: nowrap; }
 `;
 const tile = (id, x, y, st = '') => `<div class="A-tile" style="left:${x}px;top:${y}px;${st}"><div class="p">${pic(id)}</div><div class="n">${SHORT[id]}</div></div>`;
+// when each card appears (just before its name), flies into the board (on the tier, but up at least 1.3 s and at most 2.4 s, so it
+// can be seen and never covers her for long), and when its tier letter pops (on the tier word, or as it flies if that is later)
+const TIME = (id) => { const c = CUE[id]; if (!c) return null; const at = c.name - 0.3, fly = Math.min(Math.max(c.tier, at + 1.3), at + 2.4);
+  return { at, fly, stamp: Math.max(c.tier, fly) }; };
 function cardAndFlight(t, id) {
-  const c = CUE[id]; if (!c || t < c.name - 0.12) return '';
-  const u = (t - (c.name - 0.12)) / 0.35, f = (t - c.tier) / 0.55, s = SLOT[id];
+  const T = TIME(id); if (!T || t < T.at) return '';
+  const u = (t - T.at) / 0.35, f = (t - T.fly) / 0.55, s = SLOT[id];
   if (f >= 1) return tile(id, s.x, s.y);
   const k = easeInOut(f), sc = 1 - (1 - 170 / 820) * k;
   const dx = (s.x - 130) * k, dy = (s.y - 236) * k;
@@ -62,13 +68,13 @@ function cardAndFlight(t, id) {
   return card + q;
 }
 function stamp(t, id) {
-  const c = CUE[id], it = ITEMS.find((i) => i.id === id); if (!c || t < c.tier) return '';
-  const u = (t - c.tier) / 0.3, o = (t - c.tier - 1.3) / 0.3; if (o >= 1) return '';
+  const T = TIME(id), it = ITEMS.find((i) => i.id === id); if (!T || t < T.stamp) return '';
+  const u = (t - T.stamp) / 0.3, o = (t - T.stamp - 1.3) / 0.3; if (o >= 1) return '';
   const sc = (u < 1 ? 0.4 + 0.6 * backOut(u, 2.6) : 1) * (1 - 0.5 * clamp(o));
   return L.stamp(it.tier, 790, 300, `transform:rotate(-8deg) scale(${sc.toFixed(3)});opacity:${(clamp(u * 5) * (1 - clamp(o))).toFixed(3)}`);
 }
 function tray(t) {
-  const left = ITEMS.filter((i) => !(CUE[i.id] && t >= CUE[i.id].name - 0.12));
+  const left = ITEMS.filter((i) => !(TIME(i.id) && t >= TIME(i.id).at));
   return left.map((it, k) => `<div style="position:absolute;left:${540 - left.length * 55 + k * 110 + 10}px;top:${TRAY_Y}px;width:90px;height:90px;border-radius:18px;background:rgba(255,255,255,.12);padding:8px;box-sizing:border-box">
     <div style="width:74px;height:74px;border-radius:12px;overflow:hidden">${pic(it.id)}</div></div>`).join('');
 }
@@ -77,8 +83,8 @@ function banners(t) {
   const h = (t + 0.4) / 0.35, ho = (t - 7.9) / 0.3;                  // the hook, in place on frame one
   if (ho < 1) g += L.banner('Аль нь *үр дүнтэй*,<br>аль нь *цагийн гарз* вэ?', 676, `transform:scale(${(0.7 + 0.3 * backOut(h, 2)).toFixed(3)}) translateY(${(-80 * easeOut(clamp(ho)) ** 2).toFixed(1)}px);opacity:${(clamp(h * 4) * (1 - clamp(ho))).toFixed(3)}`);
   const ENROL = 88.22, PHONE = 92.6;
-  if (t >= ENROL && t < PHONE) { const u = (t - ENROL) / 0.35; g += L.banner('Хагас сайн, бүтэн сайнд<br>*хүүхдийн анги · ЭЛСЭЛТ*', 640, `transform:scale(${(0.7 + 0.3 * backOut(u, 2)).toFixed(3)});opacity:${clamp(u * 4).toFixed(3)}`); }
-  if (t >= PHONE) { const u = (t - PHONE) / 0.35; g += L.banner('*9930 4451*<br>*8888 3351*', 610, `font-size:70px;transform:scale(${(0.7 + 0.3 * backOut(u, 2)).toFixed(3)});opacity:${clamp(u * 4).toFixed(3)}`); }
+  if (t >= ENROL && t < PHONE) { const u = (t - ENROL) / 0.35; g += L.banner('Хагас сайн, бүтэн сайнд<br>*хүүхдийн анги · ЭЛСЭЛТ*', 690, `transform:scale(${(0.7 + 0.3 * backOut(u, 2)).toFixed(3)});opacity:${clamp(u * 4).toFixed(3)}`); }
+  if (t >= PHONE) { const u = (t - PHONE) / 0.35; g += L.banner('*9930 4451* · *8888 3351*', 752, `font-size:58px;transform:scale(${(0.7 + 0.3 * backOut(u, 2)).toFixed(3)});opacity:${clamp(u * 4).toFixed(3)}`); }
   return g;
 }
 function caption(t) {
@@ -93,7 +99,7 @@ function caption(t) {
 
 export const EV = () => {                                             // cues for the score (built once the captions are loaded)
   const ev = [{ t: 0, type: 'clock' }];
-  for (const it of ITEMS) { const c = CUE[it.id]; if (c) ev.push({ t: +(c.name - 0.12).toFixed(3), type: 'card', id: it.id }, { t: c.tier, type: 'tier', id: it.id, tier: it.tier }); }
+  for (const it of ITEMS) { const T = TIME(it.id); if (T) ev.push({ t: +T.at.toFixed(3), type: 'card', id: it.id }, { t: +T.stamp.toFixed(3), type: 'tier', id: it.id, tier: it.tier }); }
   ev.push({ t: 88.22, type: 'enrol' }, { t: 92.6, type: 'phone' });
   return ev.sort((a, b) => a.t - b.t);
 };
@@ -111,7 +117,7 @@ export async function init(qs) {
 export async function frame(t) {
   t = Math.min(t, DUR - 1 / 60);
   let g = BG ? `<img src="frames/${String(Math.min(3010, Math.round(t * 30))).padStart(5, '0')}.jpg" style="position:absolute;left:0;top:0;width:1080px;height:960px">` : '';
-  g += L.board(TITLE) + `<div class="A-tl" style="left:806px;top:930px;transform:rotate(3deg)">TIER LIST</div>`;
+  g += L.board(TITLE_HTML);
   g += tray(t);
   for (const it of ITEMS) g += cardAndFlight(t, it.id);
   for (const it of ITEMS) g += stamp(t, it.id);

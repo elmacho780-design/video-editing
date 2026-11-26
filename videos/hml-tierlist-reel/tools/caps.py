@@ -11,8 +11,12 @@ key = lambda w: re.sub(r'[^a-zа-яөү]', '', w.lower()).translate(str.maketran
 NAMES = {'duo': ['duolingo'], 'game': ['видео', 'тоглоом'], 'song': ['дуу', 'сонсох'], 'gt': ['google', 'translate'], 'toon': ['хүүхэлдэйн', 'кино'],
          'words': ['үг', 'цээжлэх'], 'hml': ['зөв']}
 LINE_ITEM = {2: 'duo', 3: 'game', 4: 'song', 5: 'gt', 6: 'toon', 7: 'words', 8: 'hml'}
-KW = {'duolingo', 'видео', 'тоглоом', 'дуу', 'сонсох', 'google', 'translate', 'хүүхэлдэйн', 'кино', 'үг', 'цээжлэх', 'элсэлт', 'утасны', 'дугаараар'}
+KW = {'duolingo', 'видео', 'тоглоом', 'дуу', 'сонсох', 'google', 'translate', 'хүүхэлдэйн', 'кино', 'цээжлэх', 'элсэлт', 'утасны', 'дугаараар'}
 
+# Whisper's sentence pass skipped the openings of these sentences; their word times come from the first pass (edit/pass1.json)
+OVERRIDE = {2: {0: 8.34, 1: 8.78, 2: 9.58, 3: 10.58, 4: 10.78},
+            3: {0: 19.4, 1: 20.18, 2: 20.68, 3: 21.4, 4: 22.2, 5: 22.56, 6: 23.05, 7: 23.58, 8: 23.92, 9: 24.52, 10: 25.16, 11: 25.44},
+            4: {0: 32.25, 1: 33.06, 2: 33.3, 3: 33.6, 4: 34.28, 5: 35.3, 6: 35.85, 7: 36.42}}
 phrases, cues = [], {}
 for L in A:
     toks = L['text'].split(); ww = L['words']
@@ -33,6 +37,7 @@ for L in A:
             for k in range(i, j): times[k] = round(a + (b - a) * (k - i + 1) / (j - i + 1), 2)
             i = j
         else: i += 1
+    for k, tt in OVERRIDE.get(L['id'], {}).items(): times[k] = tt
     for k in range(1, len(times)): times[k] = max(times[k], times[k - 1])
     # the cues: the method's name and the word "tier"
     it = LINE_ITEM.get(L['id'])
@@ -54,7 +59,7 @@ for L in A:
     if cur: phrases.append([start, ' '.join(cur)])
     phrases.append([round(end + 0.15, 2), None])
 # merge neighbouring keyword marks (*B* *tier* -> *B tier*); keep a blank only where the next phrase is more than 0.4 s away
-phrases = [[t, s.replace('* *', ' ') if s else s] for t, s in phrases]
+phrases = [[t, s.replace('* *', ' ').replace('үг *цээжлэх', '*үг цээжлэх') if s else s] for t, s in phrases]
 phrases = [p for i, p in enumerate(phrases) if p[1] is not None or i == len(phrases) - 1 or phrases[i + 1][0] - p[0] > 0.4]
 json.dump({'phrases': phrases, 'cues': cues}, open(os.path.join(ROOT, 'edit', 'caps.json'), 'w'), ensure_ascii=False, indent=1)
 for t, s in phrases: print(f'{t:6.2f}  {s}')

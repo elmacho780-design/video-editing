@@ -6,7 +6,7 @@
 // Icons are our own drawings: no app logos or mascots. All Mongolian is Claude's, for Batu to check.
 
 export const TIERS = ['S', 'A', 'B', 'C'];
-export const ROW_Y = [1046, 1170, 1294, 1418], ROW_H = 112;
+export const ROW_Y = [1080, 1198, 1316, 1434], ROW_H = 108;
 export const ITEMS = [
   { id: 'duo', name: 'Duolingo', mn: 'Апп', tier: 'B', icon: 'phone' },
   { id: 'game', name: 'Видео тоглоом', mn: 'Тоглоом', tier: 'S', icon: 'pad' },
@@ -34,5 +34,5 @@ export const ICON = {
   hml: () => `<div style="width:100%;height:100%;background:#fff url(assets/hml-tree.png) center/82% no-repeat;border-radius:16px"></div>`,
 };
 // the tray of methods still to be ranked (bottom strip, inside Instagram's caption zone: decoration, not key content)
-export const TRAY_Y = 1590;
+export const TRAY_Y = 1600;
 export const icon = (name, size) => `<div style="width:${size}px;height:${size}px">${ICON[name]()}</div>`;
